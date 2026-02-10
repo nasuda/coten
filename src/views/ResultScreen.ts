@@ -6,12 +6,13 @@ import { el, onClick, setScreen } from '../utils/render.ts';
 import { playTap, playLevelUp } from '../utils/audio.ts';
 import { getOrCreateSave, saveSaveData } from '../utils/storage.ts';
 import { calculateLevelUp, calculatePlayerStats, calculateExpReward, calculateStonesReward } from '../models/ProgressManager.ts';
+import { applyBattleResultToSave } from '../models/SaveDataUpdater.ts';
 import { renderMenuScreen } from './MenuScreen.ts';
 import { renderWorldScreen } from './WorldScreen.ts';
-import type { BattleResult } from '../models/types.ts';
+import type { BattleResult, TurnResult } from '../models/types.ts';
 import { getStageById } from '../data/stages.ts';
 
-export function renderResultScreen(result: BattleResult): void {
+export function renderResultScreen(result: BattleResult, turnResults: TurnResult[] = []): void {
   setScreen('result', () => {
     const screen = el('div', { class: 'result-screen' });
     const save = getOrCreateSave();
@@ -43,6 +44,11 @@ export function renderResultScreen(result: BattleResult): void {
     if (stonesReward > 0) {
       stats.appendChild(createRow('獲得石', `+${stonesReward} 💎`, 'text-gold'));
     }
+
+    // 図鑑データ更新
+    const zukanUpdated = applyBattleResultToSave(save, result, turnResults);
+    save.zukanJodoushi = zukanUpdated.zukanJodoushi;
+    save.zukanEnemies = zukanUpdated.zukanEnemies;
 
     // セーブデータ更新
     if (result.victory) {

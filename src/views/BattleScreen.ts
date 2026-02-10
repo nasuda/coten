@@ -256,7 +256,7 @@ export function renderBattleScreen(stageId: string, enemy: Enemy): void {
       const battleResult = createBattleResult(state, stageId);
 
       setTimeout(() => {
-        renderResultScreen(battleResult);
+        renderResultScreen(battleResult, state.turnResults);
       }, 1500);
     }
 
