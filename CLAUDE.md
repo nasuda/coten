@@ -23,6 +23,17 @@
 src/
   data/           -- 静的データ (助動詞26個, 敵32体, ステージ32, 問題75+, スキル, ガチャ)
   models/         -- ゲームロジック (純粋関数中心, テスト対象)
+    BattleEngine.ts      -- バトル進行 (ターン処理, 勝敗判定)
+    DamageCalculator.ts  -- ダメージ計算 (属性, コンボ, 速度)
+    QuestionGenerator.ts -- 問題生成
+    ProgressManager.ts   -- 経験値/レベル/星評価/石報酬
+    GachaSystem.ts       -- ガチャロジック
+    ZukanManager.ts      -- 図鑑データ管理
+    SaveDataUpdater.ts   -- バトル結果→セーブデータ反映
+    CardUpgrade.ts       -- カード強化 (コスト計算, レベルアップ)
+    DeckManager.ts       -- デッキ編集 (バリデーション, カード入替)
+    BossRush.ts          -- ボスラッシュ連続戦闘管理
+    types.ts             -- 全型定義 + 定数
   views/          -- 画面 (DOM操作, テスト対象外)
     components/   -- UIコンポーネント (HPBar, TimerBar等)
   utils/          -- ユーティリティ (render, audio, storage, shuffle)
@@ -53,9 +64,28 @@ TitleScreen → MenuScreen → WorldScreen → BattleScreen → ResultScreen
 - 速度ボーナス: 0-3秒 = 1.3x, 3-7秒 = 1.0x, 7-10秒 = 0.8x
 - 属性相性: 炎→氷→風→炎, 光⇔闇, 地→幻→水→地
 
+### ボスラッシュ (Chapter 5)
+- ステージ s5_4（文法帝の間）がトリガー
+- Chapter 1-4 のボス4体と連続戦闘
+- `BossRushScreen.ts` がモジュールレベルで `rushState` を管理
+- `BattleScreen` は `isBossRushActive()` で分岐し、ボスラッシュ中はリザルトを `handleBossRushResult()` に委譲
+- 全撃破で制覇ボーナス 💎100個
+
+### カード強化システム
+- `CardUpgrade.ts`: レアリティ別コスト倍率 (N=1x, R=2x, SR=3x, SSR=5x)
+- レベル上限: `MAX_CARD_LEVEL = 10`
+- パワー上昇: レアリティ別 (N=+2, R=+3, SR=+4, SSR=+5)
+- 強化コスト: `(3 + currentLevel * 2) * rarityMultiplier` 石
+
+### デッキ編集
+- デッキサイズ: `DECK_SIZE = 5` 固定
+- `DeckManager.ts`: バリデーション (枚数/重複/所持チェック)、カード入替
+
 ### セーブデータ
 - localStorage キー: `bunpou_musou_save`
 - `SaveData` 型: プレイヤー情報, ステージクリア, 図鑑, チャプター進行度
+- バトル後の図鑑更新: `applyBattleResultToSave()` で zukanJodoushi/zukanEnemies を一括更新
+- チャプタークリア判定: `isChapterCleared()` で全ステージクリアを確認 → +50石ボーナス
 
 ## 重要な型 (src/models/types.ts)
 
@@ -83,6 +113,9 @@ TitleScreen → MenuScreen → WorldScreen → BattleScreen → ResultScreen
 - 画面遷移は `setScreen(type, renderFn)` を使用
 - 効果音は `audio.ts` の関数を使用 (Web Audio API合成、外部ファイル不要)
 - セーブは `storage.ts` の `saveSaveData()` / `getOrCreateSave()` を使用
+- 新ロジック追加時は models/ に純粋関数として実装し、テストを先に書く (TDD)
+- views/ の画面はモジュールレベル状態を最小限に保つ (ボスラッシュの `rushState` が例外)
+- セーブデータ更新は `SaveDataUpdater.ts` を経由してイミュータブルに行う
 
 ## テスト
 
