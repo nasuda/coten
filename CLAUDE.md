@@ -91,15 +91,17 @@ src/__tests__/
   DamageCalculator.test.ts   -- ダメージ計算 (19テスト)
   QuestionGenerator.test.ts  -- 問題生成 (6テスト)
   BattleEngine.test.ts       -- バトルエンジン (11テスト)
-  ProgressManager.test.ts    -- 経験値/レベルアップ (16テスト)
+  ProgressManager.test.ts    -- 経験値/レベルアップ (19テスト)
   GachaSystem.test.ts        -- ガチャ (6テスト)
   ZukanManager.test.ts       -- 図鑑管理 (12テスト)
+  SaveDataUpdater.test.ts    -- 図鑑データ更新 (10テスト)
+  CardUpgrade.test.ts        -- カード強化 (11テスト)
+  DeckManager.test.ts        -- デッキ管理 (10テスト)
+  BossRush.test.ts           -- ボスラッシュ (8テスト)
 ```
 
 ## 既知の制限・今後の課題
 
-- ステージクリア後に図鑑の遭遇/撃破データを更新するロジックが未接続
-- ボスラッシュ (Chapter 5) の連続戦闘は未実装
-- チャプタークリアボーナス石 (50個) の付与が未実装
-- カードレベルアップUI・強化システムが未実装
-- デッキ編集UIが未実装
+- カードレベルアップUI（ロジックは実装済み: `CardUpgrade.ts`）
+- デッキ編集UI（ロジックは実装済み: `DeckManager.ts`）
+- ボスラッシュUI（ロジックは実装済み: `BossRush.ts`）
