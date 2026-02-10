@@ -33,15 +33,17 @@ src/
 
 ### 設計方針
 - **フレームワークなし**: `render.ts` の `el()` と `setScreen()` でDOM管理
-- **テスト駆動**: models/ 内のロジックは全てVitestでテスト済み (81テスト)
+- **テスト駆動**: models/ 内のロジックは全てVitestでテスト済み (123テスト)
 - **views/ はテスト対象外**: DOM依存のため `npm run dev` で手動確認
 - **純粋関数**: models/ はDOM非依存、入力→出力の純粋関数で構成
 
 ### ゲームフロー
 ```
 TitleScreen → MenuScreen → WorldScreen → BattleScreen → ResultScreen
-                 ↓
-           GachaScreen / ZukanScreen
+                 ↓              ↓
+    GachaScreen / ZukanScreen  BossRushScreen (Chapter 5)
+    CardUpgradeScreen
+    DeckEditScreen
 ```
 
 ### バトルシステム
@@ -102,6 +104,5 @@ src/__tests__/
 
 ## 既知の制限・今後の課題
 
-- カードレベルアップUI（ロジックは実装済み: `CardUpgrade.ts`）
-- デッキ編集UI（ロジックは実装済み: `DeckManager.ts`）
-- ボスラッシュUI（ロジックは実装済み: `BossRush.ts`）
+- 全機能実装済み（ロジック + UI）
+- 今後の改善候補: カード合成システム、ランキング、マルチプレイ

@@ -17,6 +17,7 @@ import { createEnemySprite, shakeEnemy } from './components/EnemySprite.ts';
 import { showDamageNumber, showSpeedLabel } from './components/DamageNumber.ts';
 import { showCutinOverlay } from './components/CutinOverlay.ts';
 import { renderResultScreen } from './ResultScreen.ts';
+import { isBossRushActive, handleBossRushResult } from './BossRushScreen.ts';
 import type { Enemy } from '../models/types.ts';
 
 function clearElement(element: HTMLElement): void {
@@ -256,7 +257,11 @@ export function renderBattleScreen(stageId: string, enemy: Enemy): void {
       const battleResult = createBattleResult(state, stageId);
 
       setTimeout(() => {
-        renderResultScreen(battleResult, state.turnResults);
+        if (isBossRushActive()) {
+          handleBossRushResult(battleResult, state.turnResults);
+        } else {
+          renderResultScreen(battleResult, state.turnResults);
+        }
       }, 1500);
     }
 

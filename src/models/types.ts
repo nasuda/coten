@@ -264,7 +264,7 @@ export interface SaveData {
 }
 
 // --- 画面タイプ ---
-export type ScreenType = 'title' | 'menu' | 'world' | 'battle' | 'result' | 'gacha' | 'zukan';
+export type ScreenType = 'title' | 'menu' | 'world' | 'battle' | 'result' | 'gacha' | 'zukan' | 'card_upgrade' | 'deck_edit' | 'boss_rush';
 
 // --- ダメージ計算入力 ---
 export interface DamageInput {

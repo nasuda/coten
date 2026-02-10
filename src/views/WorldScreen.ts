@@ -9,6 +9,7 @@ import { allChapters, getStagesByChapter } from '../data/stages.ts';
 import { getEnemyById } from '../data/enemies.ts';
 import { renderMenuScreen } from './MenuScreen.ts';
 import { renderBattleScreen } from './BattleScreen.ts';
+import { startBossRush } from './BossRushScreen.ts';
 import type { StageClearData } from '../models/types.ts';
 
 function clearElement(element: HTMLElement): void {
@@ -110,7 +111,11 @@ function renderStageList(container: HTMLElement, chapterId: number, clears: Stag
       const enemy = getEnemyById(stage.enemies[0] ?? '');
       onClick(card, () => {
         playTap();
-        if (enemy) renderBattleScreen(stage.id, enemy);
+        if (stage.id === 's5_4') {
+          startBossRush();
+        } else if (enemy) {
+          renderBattleScreen(stage.id, enemy);
+        }
       });
     }
 

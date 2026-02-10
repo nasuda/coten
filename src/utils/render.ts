@@ -2,7 +2,7 @@
 // 画面遷移管理 & DOM操作ヘルパー
 // ============================================================
 
-export type ScreenType = 'title' | 'menu' | 'world' | 'battle' | 'result' | 'gacha' | 'zukan';
+export type ScreenType = 'title' | 'menu' | 'world' | 'battle' | 'result' | 'gacha' | 'zukan' | 'card_upgrade' | 'deck_edit' | 'boss_rush';
 
 let currentScreen: ScreenType | null = null;
 

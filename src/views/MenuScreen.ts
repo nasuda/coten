@@ -8,6 +8,8 @@ import { getOrCreateSave } from '../utils/storage.ts';
 import { renderWorldScreen } from './WorldScreen.ts';
 import { renderGachaScreen } from './GachaScreen.ts';
 import { renderZukanScreen } from './ZukanScreen.ts';
+import { renderCardUpgradeScreen } from './CardUpgradeScreen.ts';
+import { renderDeckEditScreen } from './DeckEditScreen.ts';
 
 export function renderMenuScreen(): void {
   setScreen('menu', () => {
@@ -34,11 +36,19 @@ export function renderMenuScreen(): void {
     const gachaBtn = createMenuBtn('🎰', 'ガチャ', 'スキルカードを入手');
     onClick(gachaBtn, () => { playTap(); renderGachaScreen(); });
 
+    const upgradeBtn = createMenuBtn('⚡', 'カード強化', '石を使ってカードを強化');
+    onClick(upgradeBtn, () => { playTap(); renderCardUpgradeScreen(); });
+
+    const deckBtn = createMenuBtn('🃏', 'デッキ編集', 'バトルデッキを組み替え');
+    onClick(deckBtn, () => { playTap(); renderDeckEditScreen(); });
+
     const zukanBtn = createMenuBtn('📖', '図鑑', '助動詞・敵図鑑');
     onClick(zukanBtn, () => { playTap(); renderZukanScreen(); });
 
     buttons.appendChild(questBtn);
     buttons.appendChild(gachaBtn);
+    buttons.appendChild(upgradeBtn);
+    buttons.appendChild(deckBtn);
     buttons.appendChild(zukanBtn);
 
     screen.appendChild(header);

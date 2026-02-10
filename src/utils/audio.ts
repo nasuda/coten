@@ -144,3 +144,24 @@ export function playLevelUp(): void {
     setTimeout(() => playTone(freq, 0.2, 'triangle', 0.2), i * 100);
   });
 }
+
+// カード強化音
+export function playUpgrade(): void {
+  playTone(440, 0.1, 'triangle', 0.15);
+  setTimeout(() => playTone(554, 0.1, 'triangle', 0.15), 100);
+  setTimeout(() => playTone(659, 0.15, 'sine', 0.2), 200);
+}
+
+// デッキセット音
+export function playEquip(): void {
+  playTone(523, 0.08, 'sine', 0.12);
+  setTimeout(() => playTone(659, 0.12, 'sine', 0.15), 80);
+}
+
+// ボスラッシュ開始音
+export function playBossRushStart(): void {
+  const notes = [262, 330, 392, 523, 659, 784];
+  notes.forEach((freq, i) => {
+    setTimeout(() => playTone(freq, 0.2, 'square', 0.15), i * 80);
+  });
+}
