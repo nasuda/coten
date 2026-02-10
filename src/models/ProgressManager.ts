@@ -47,14 +47,17 @@ export function calculateStarRating(accuracyRate: number): StarRating {
   return 0;
 }
 
+export const CHAPTER_CLEAR_BONUS = 50;
+
 export function calculateStonesReward(
   alreadyCleared: boolean,
   isBoss: boolean,
-  _isChapterClear: boolean,
+  isChapterClear: boolean,
 ): number {
   if (alreadyCleared) return 0;
-  if (isBoss) return 30;
-  return 10;
+  let stones = isBoss ? 30 : 10;
+  if (isChapterClear) stones += CHAPTER_CLEAR_BONUS;
+  return stones;
 }
 
 export function calculateExpReward(baseExp: number, starRating: StarRating): number {

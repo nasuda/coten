@@ -95,5 +95,20 @@ describe('ProgressManager', () => {
       const stones = calculateStonesReward(true, false, false);
       expect(stones).toBe(0);
     });
+
+    it('チャプタークリアでボーナス50個が加算される', () => {
+      const stones = calculateStonesReward(false, true, true);
+      expect(stones).toBe(80); // ボス30 + チャプターボーナス50
+    });
+
+    it('通常ステージでもチャプタークリアなら+50個', () => {
+      const stones = calculateStonesReward(false, false, true);
+      expect(stones).toBe(60); // 通常10 + チャプターボーナス50
+    });
+
+    it('再クリアはチャプタークリアでも0個', () => {
+      const stones = calculateStonesReward(true, true, true);
+      expect(stones).toBe(0);
+    });
   });
 });

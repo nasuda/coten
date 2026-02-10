@@ -6,7 +6,7 @@ import { el, onClick, setScreen } from '../utils/render.ts';
 import { playTap, playLevelUp } from '../utils/audio.ts';
 import { getOrCreateSave, saveSaveData } from '../utils/storage.ts';
 import { calculateLevelUp, calculatePlayerStats, calculateExpReward, calculateStonesReward } from '../models/ProgressManager.ts';
-import { applyBattleResultToSave } from '../models/SaveDataUpdater.ts';
+import { applyBattleResultToSave, isChapterCleared } from '../models/SaveDataUpdater.ts';
 import { renderMenuScreen } from './MenuScreen.ts';
 import { renderWorldScreen } from './WorldScreen.ts';
 import type { BattleResult, TurnResult } from '../models/types.ts';
@@ -36,13 +36,20 @@ export function renderResultScreen(result: BattleResult, turnResults: TurnResult
     // 報酬計算
     const alreadyCleared = save.stageClears.some(c => c.stageId === result.stageId && c.cleared);
     const isBoss = stage?.isBossStage ?? false;
-    const stonesReward = result.victory ? calculateStonesReward(alreadyCleared, isBoss, false) : 0;
+    // チャプタークリア判定: このステージクリアで全ステージ完了になるか
+    const chapterId = stage?.chapterId ?? 1;
+    const willChapterClear = result.victory && !alreadyCleared && !isChapterCleared(chapterId, save.stageClears) &&
+      isChapterCleared(chapterId, [...save.stageClears, { stageId: result.stageId, cleared: true, bestStars: result.starRating, clearCount: 1 }]);
+    const stonesReward = result.victory ? calculateStonesReward(alreadyCleared, isBoss, willChapterClear) : 0;
     const expReward = calculateExpReward(result.expGained, result.starRating);
 
     stats.appendChild(el('div', { style: 'border-top: 1px solid #444; margin: 8px 0' }));
     stats.appendChild(createRow('獲得EXP', `+${expReward}`, 'text-green'));
     if (stonesReward > 0) {
       stats.appendChild(createRow('獲得石', `+${stonesReward} 💎`, 'text-gold'));
+    }
+    if (willChapterClear) {
+      stats.appendChild(createRow('CHAPTER CLEAR!', '+50 💎 ボーナス', 'text-gold'));
     }
 
     // 図鑑データ更新
