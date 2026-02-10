@@ -1,0 +1,184 @@
+/* ============================================================
+   文法無双 ～俺の詠嘆が世界を救う～ ベーススタイル
+   ダークファンタジーテーマ
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&family=Noto+Serif+JP:wght@400;700&display=swap');
+
+:root {
+  --bg-primary: #0a0a14;
+  --bg-secondary: #12122a;
+  --bg-card: #1a1a3e;
+  --bg-overlay: rgba(0, 0, 0, 0.85);
+  --text-primary: #e8e6f0;
+  --text-secondary: #9994b8;
+  --text-accent: #ffd700;
+  --accent-gold: #ffd700;
+  --accent-red: #ff4444;
+  --accent-blue: #4488ff;
+  --accent-green: #44ff88;
+  --accent-purple: #aa44ff;
+  --element-fire: #ff6633;
+  --element-ice: #66ccff;
+  --element-wind: #66ff99;
+  --element-light: #ffee55;
+  --element-dark: #aa55ff;
+  --element-earth: #cc9944;
+  --element-phantom: #ff66cc;
+  --element-water: #4488ff;
+  --hp-player: #44cc44;
+  --hp-enemy: #cc4444;
+  --combo-gauge: #ffaa00;
+  --border-glow: rgba(255, 215, 0, 0.3);
+  --font-main: 'Zen Maru Gothic', sans-serif;
+  --font-serif: 'Noto Serif JP', serif;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+.screen.active {
+  opacity: 1;
+}
+
+/* --- ボタン共通 --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border: 2px solid var(--accent-gold);
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary));
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn:active {
+  transform: scale(0.95);
+  background: var(--bg-card);
+}
+
+.btn--gold {
+  background: linear-gradient(135deg, #ffd700, #ffaa00);
+  color: #1a1a3e;
+  border-color: #ffcc00;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+}
+
+.btn--gold:active {
+  background: linear-gradient(135deg, #ffaa00, #ff8800);
+}
+
+.btn--danger {
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+
+.btn--disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.btn--large {
+  padding: 16px 32px;
+  font-size: 1.2rem;
+}
+
+.btn--small {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+/* --- テキスト --- */
+.text-gold { color: var(--accent-gold); }
+.text-red { color: var(--accent-red); }
+.text-blue { color: var(--accent-blue); }
+.text-green { color: var(--accent-green); }
+.text-secondary { color: var(--text-secondary); }
+
+.text-center { text-align: center; }
+
+.font-serif { font-family: var(--font-serif); }
+
+/* --- レアリティ色 --- */
+.rarity-N { color: #aaaaaa; }
+.rarity-R { color: #4488ff; }
+.rarity-SR { color: #aa44ff; }
+.rarity-SSR { color: #ffd700; text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); }
+
+/* --- 属性アイコン色 --- */
+.element-fire { color: var(--element-fire); }
+.element-ice { color: var(--element-ice); }
+.element-wind { color: var(--element-wind); }
+.element-light { color: var(--element-light); }
+.element-dark { color: var(--element-dark); }
+.element-earth { color: var(--element-earth); }
+.element-phantom { color: var(--element-phantom); }
+.element-water { color: var(--element-water); }
+
+/* --- スクロール --- */
+.scroll-container {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-card) transparent;
+}
+
+/* --- モバイル対応 --- */
+@media (max-width: 380px) {
+  .btn { padding: 10px 18px; font-size: 0.9rem; }
+  .btn--large { padding: 12px 24px; font-size: 1.05rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

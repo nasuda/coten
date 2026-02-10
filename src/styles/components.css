@@ -1,0 +1,368 @@
+/* ============================================================
+   共通コンポーネントスタイル
+   ============================================================ */
+
+/* --- タイトル画面 --- */
+.title-screen {
+  background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a14 70%);
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+}
+
+.title-logo {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--accent-gold);
+  text-align: center;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+}
+
+.title-subtitle {
+  font-size: 0.85rem;
+  color: var(--accent-purple);
+  letter-spacing: 0.15em;
+}
+
+/* --- メニュー画面 --- */
+.menu-screen {
+  background: linear-gradient(180deg, #0a0a14, #12122a);
+  padding: 20px 16px;
+  gap: 12px;
+}
+
+.menu-header {
+  text-align: center;
+  padding: 12px 0;
+}
+
+.menu-player-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border-radius: 8px;
+  border: 1px solid #333;
+  font-size: 0.85rem;
+}
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  justify-content: center;
+}
+
+.menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 1px solid #444;
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.menu-btn:active {
+  transform: scale(0.97);
+  background: #222244;
+}
+
+.menu-btn-icon {
+  font-size: 1.8rem;
+}
+
+/* --- ワールドマップ --- */
+.world-screen {
+  background: linear-gradient(180deg, #0a0a14, #12122a);
+  padding: 12px;
+  gap: 8px;
+}
+
+.world-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+}
+
+.chapter-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px;
+}
+
+.chapter-card {
+  background: var(--bg-card);
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chapter-card:active {
+  transform: scale(0.98);
+}
+
+.chapter-card.locked {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.chapter-card.current {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 8px var(--border-glow);
+}
+
+.chapter-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+
+.chapter-theme {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.chapter-progress {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.stage-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #333;
+  border: 1px solid #555;
+}
+
+.stage-dot.cleared { background: var(--accent-green); border-color: var(--accent-green); }
+.stage-dot.current { background: var(--accent-gold); border-color: var(--accent-gold); animation: pulse 1.5s infinite; }
+.stage-dot.boss { border-color: var(--accent-red); }
+
+/* --- ステージ選択 --- */
+.stage-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px;
+}
+
+.stage-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-card);
+  border: 1px solid #444;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stage-card:active { transform: scale(0.98); }
+.stage-card.locked { opacity: 0.3; pointer-events: none; }
+.stage-card.boss { border-color: var(--accent-red); }
+
+.stage-number {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #333;
+  border-radius: 50%;
+  font-weight: 900;
+  font-size: 0.9rem;
+}
+
+.stage-info {
+  flex: 1;
+}
+
+.stage-name { font-weight: 700; font-size: 0.95rem; }
+.stage-desc { font-size: 0.7rem; color: var(--text-secondary); margin-top: 2px; }
+
+.stage-stars {
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+}
+
+/* --- リザルト画面 --- */
+.result-screen {
+  background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a14 70%);
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+}
+
+.result-title {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.result-stars {
+  font-size: 2.5rem;
+  letter-spacing: 8px;
+}
+
+.result-stats {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.result-row-label { color: var(--text-secondary); }
+.result-row-value { font-weight: 700; }
+
+/* --- ガチャ画面 --- */
+.gacha-screen {
+  background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a14 70%);
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+}
+
+.gacha-title {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--accent-gold);
+}
+
+.gacha-card-reveal {
+  width: 140px;
+  height: 200px;
+  background: var(--bg-card);
+  border: 3px solid #555;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.gacha-card-reveal.rarity-SSR {
+  border-color: var(--accent-gold);
+}
+
+.gacha-card-reveal.rarity-SR {
+  border-color: var(--accent-purple);
+}
+
+.gacha-card-name {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.gacha-stones {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* --- 図鑑画面 --- */
+.zukan-screen {
+  background: linear-gradient(180deg, #0a0a14, #12122a);
+  padding: 12px;
+  gap: 8px;
+}
+
+.zukan-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.zukan-tab {
+  flex: 1;
+  padding: 8px;
+  text-align: center;
+  background: var(--bg-card);
+  border: 1px solid #444;
+  border-radius: 8px 8px 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.zukan-tab.active {
+  background: #222244;
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.zukan-list {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  padding: 4px;
+  align-content: start;
+}
+
+.zukan-entry {
+  background: var(--bg-card);
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+.zukan-entry.unknown {
+  opacity: 0.3;
+}
+
+.zukan-entry-name {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.zukan-entry-detail {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.mastery-stars {
+  color: var(--accent-gold);
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
