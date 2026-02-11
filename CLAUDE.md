@@ -103,6 +103,14 @@ TitleScreen → ProfileSelectScreen → MenuScreen → WorldScreen → BattleScr
 - バトル後の図鑑更新: `applyBattleResultToSave()` で zukanJodoushi/zukanEnemies + typeStats を一括更新
 - チャプタークリア判定: `isChapterCleared()` で全ステージクリアを確認 → +50石ボーナス
 
+### TCGバトル画面の設計
+- `TCGBattleScreen.ts`: モジュールレベル状態 (`battleState`, `actionMode`, `selectedHandIndex`)
+- `renderBattleUI(container, opponent, resetTimer)`: 第3引数でタイマーリセット制御
+  - `resetTimer=true` (デフォルト): 新ラウンド開始時のみ使用
+  - `resetTimer=false`: カード選択・モード変更・クイズ回答後などUI再描画時
+- タイマーDOM参照は `timerTargetFill/Container/Opponent` で外部保持し、再描画後も継続更新
+- `endPlayerTurn()` でクイズオーバーレイ `.tcg-quiz-overlay` を確実に除去
+
 ### TCG学習レポート
 - TCGリザルト画面に誤接続レビューセクションを表示
 - `connectionHistory` (プレイヤーのみ) をBattleScreenからResultScreenに引き渡し
