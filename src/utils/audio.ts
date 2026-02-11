@@ -187,3 +187,24 @@ export function playBossRushStart(): void {
     setTimeout(() => playTone(freq, 0.2, 'square', 0.15), i * 80);
   });
 }
+
+// --- TCG用効果音 ---
+
+// カード配置音
+export function playCardPlace(): void {
+  playTone(440, 0.06, 'sine', 0.1);
+  setTimeout(() => playTone(554, 0.08, 'sine', 0.12), 50);
+}
+
+// カード装備音（成功）
+export function playCardEquip(): void {
+  playTone(523, 0.08, 'triangle', 0.15);
+  setTimeout(() => playTone(659, 0.08, 'triangle', 0.15), 70);
+  setTimeout(() => playTone(784, 0.12, 'sine', 0.12), 140);
+}
+
+// 装備失敗音（バウンス）
+export function playCardBounce(): void {
+  playTone(350, 0.08, 'square', 0.12);
+  setTimeout(() => playTone(250, 0.1, 'square', 0.1), 80);
+}

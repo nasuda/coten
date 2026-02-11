@@ -5,6 +5,7 @@
 import { el, onClick, setScreen } from '../utils/render.ts';
 import { initAudio, playTap } from '../utils/audio.ts';
 import { renderMenuScreen } from './MenuScreen.ts';
+import { renderHowToPlayScreen } from './HowToPlayScreen.ts';
 
 export function renderTitleScreen(): void {
   setScreen('title', () => {
@@ -22,11 +23,19 @@ export function renderTitleScreen(): void {
       renderMenuScreen();
     });
 
+    const howtoBtn = el('button', { class: 'btn btn--secondary' }, '📜 遊び方');
+    onClick(howtoBtn, () => {
+      initAudio();
+      playTap();
+      renderHowToPlayScreen('title');
+    });
+
     screen.appendChild(subtitle);
     screen.appendChild(logo);
     screen.appendChild(sub2);
     screen.appendChild(el('div', { style: 'height: 40px' }));
     screen.appendChild(startBtn);
+    screen.appendChild(howtoBtn);
 
     return screen;
   });

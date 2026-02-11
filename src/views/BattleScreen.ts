@@ -134,15 +134,24 @@ export function renderBattleScreen(stageId: string, enemy: Enemy): void {
       playWrong();
 
       const timeElapsed = state.timeLimit;
+      const correctName = state.currentQuestion
+        ? state.currentQuestion.choices[state.currentQuestion.correctCardIndex]?.name
+        : undefined;
+
+      const prevHP = state.playerCurrentHP;
       const result = processTurnAnswer(state, false, timeElapsed, 0);
       state = result.state;
 
       updateHPBar(playerHPBar, state.playerCurrentHP, state.playerMaxHP);
       updateComboGauge(comboGauge, state.combo, state.comboGauge);
       updateSpecialBtn();
-      logArea.textContent = '時間切れ！';
+      clearElement(logArea);
+      logArea.appendChild(el('div', {}, '時間切れ！'));
+      if (correctName) {
+        logArea.appendChild(el('div', { class: 'battle-log-hint' }, `正解: 「${correctName}」`));
+      }
 
-      showDamageNumber(screen, Math.floor(state.playerMaxHP * 0.125), 'enemy');
+      showDamageNumber(screen, prevHP - state.playerCurrentHP, 'enemy');
 
       setTimeout(() => {
         const endResult = checkBattleEnd(state);
@@ -184,6 +193,7 @@ export function renderBattleScreen(stageId: string, enemy: Enemy): void {
           playWrong();
         }
 
+        const prevPlayerHP = state.playerCurrentHP;
         const result = processTurnAnswer(state, correct, timeElapsed, selectedIndex);
         state = result.state;
 
@@ -200,12 +210,22 @@ export function renderBattleScreen(stageId: string, enemy: Enemy): void {
           if (state.combo > 1) playCombo(state.combo);
           logArea.textContent = `${result.turnResult.damage}ダメージ！ Combo x${state.combo}`;
         } else {
-          showDamageNumber(screen, Math.floor(state.playerMaxHP * 0.125), 'enemy');
-          logArea.textContent = '不正解... 反撃を受けた！';
+          showDamageNumber(screen, prevPlayerHP - state.playerCurrentHP, 'enemy');
+          clearElement(logArea);
+          logArea.appendChild(el('div', {}, '不正解... 反撃を受けた！'));
+          const correctCard = state.currentQuestion?.choices[state.currentQuestion.correctCardIndex];
+          if (correctCard) {
+            const hint = state.currentQuestion?.template.hint
+              ?? state.currentQuestion?.template.targetMeaning
+              ?? state.currentQuestion?.template.targetAnswer
+              ?? '';
+            const hintText = hint ? ` → ${hint}` : '';
+            logArea.appendChild(el('div', { class: 'battle-log-hint' }, `正解:「${correctCard.name}」${hintText}`));
+          }
           await animateElement(screen, 'shake', 400);
         }
 
-        await waitMs(1200);
+        await waitMs(correct ? 1200 : 2200);
 
         const endResult = checkBattleEnd(state);
         if (endResult) {
@@ -226,7 +246,8 @@ export function renderBattleScreen(stageId: string, enemy: Enemy): void {
       const chapter = stage?.chapterId ?? 1;
       const isBoss = enemy.isBoss;
       const qType = selectQuestionType(chapter, isBoss);
-      const question = generateQuestion(chapter, state.hand, qType);
+      const numChoices = enemy.gimmick?.type === 'extraChoices' ? enemy.gimmick.value : 5;
+      const question = generateQuestion(chapter, state.hand, qType, numChoices);
 
       if (!question) {
         console.error(`バトル: チャプター ${chapter} で問題生成に失敗。手札数: ${state.hand.length}, タイプ: ${qType}`);
@@ -244,9 +265,7 @@ export function renderBattleScreen(stageId: string, enemy: Enemy): void {
 
       // 手札更新
       clearElement(handArea);
-      const numChoices = enemy.gimmick?.type === 'extraChoices' ? enemy.gimmick.value : 5;
-      const choices = question.choices.slice(0, numChoices);
-      choices.forEach((card, i) => {
+      question.choices.forEach((card, i) => {
         const cardView = createSkillCardView(card, i, handleAnswer);
         handArea.appendChild(cardView);
       });

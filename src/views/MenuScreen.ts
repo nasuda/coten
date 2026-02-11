@@ -10,6 +10,7 @@ import { renderGachaScreen } from './GachaScreen.ts';
 import { renderZukanScreen } from './ZukanScreen.ts';
 import { renderCardUpgradeScreen } from './CardUpgradeScreen.ts';
 import { renderDeckEditScreen } from './DeckEditScreen.ts';
+import { renderHowToPlayScreen } from './HowToPlayScreen.ts';
 
 export function renderMenuScreen(): void {
   setScreen('menu', () => {
@@ -45,11 +46,15 @@ export function renderMenuScreen(): void {
     const zukanBtn = createMenuBtn('📖', '図鑑', '助動詞・敵図鑑');
     onClick(zukanBtn, () => { playTap(); renderZukanScreen(); });
 
+    const howtoBtn = createMenuBtn('📜', '遊び方', 'バトルの基本を確認');
+    onClick(howtoBtn, () => { playTap(); renderHowToPlayScreen('menu'); });
+
     buttons.appendChild(questBtn);
     buttons.appendChild(gachaBtn);
     buttons.appendChild(upgradeBtn);
     buttons.appendChild(deckBtn);
     buttons.appendChild(zukanBtn);
+    buttons.appendChild(howtoBtn);
 
     screen.appendChild(header);
     screen.appendChild(info);

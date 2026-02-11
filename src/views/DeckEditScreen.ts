@@ -41,12 +41,12 @@ export function renderDeckEditScreen(): void {
       for (let i = 0; i < DECK_SIZE; i++) {
         const cardId = save.player.equippedDeck[i];
         const card = save.player.cards.find(c => c.id === cardId);
-        const slot = createDeckSlot(card, i);
+        const slot = createDeckSlot(card);
         deckArea.appendChild(slot);
       }
     }
 
-    function createDeckSlot(card: SkillCard | undefined, _index: number): HTMLElement {
+    function createDeckSlot(card: SkillCard | undefined): HTMLElement {
       if (!card) {
         const emptySlot = el('div', { class: 'deck-slot empty' }, '空');
         return emptySlot;

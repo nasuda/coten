@@ -11,6 +11,7 @@ export function generateQuestion(
   chapter: number,
   hand: SkillCard[],
   preferredType?: QuestionType,
+  numChoices: number = 5,
 ): BattleQuestion | null {
   // chapter以下の問題から候補を絞る
   const availableQuestions = allQuestions.filter(q => q.chapter <= chapter);
@@ -57,7 +58,7 @@ export function generateQuestion(
       power: j.basePower,
     } as SkillCard));
 
-  const result = generateChoices(correctCard, dummyPool, 5);
+  const result = generateChoices(correctCard, dummyPool, numChoices);
 
   // 表示テキスト生成
   let displayText = template.sentence;

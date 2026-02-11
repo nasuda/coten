@@ -36,6 +36,19 @@ describe('CardUpgrade', () => {
       expect(costSR).toBeGreaterThan(costN);
       expect(costSSR).toBeGreaterThan(costSR);
     });
+
+    it('各レアリティのレベル1→2コストを正確に計算できる', () => {
+      // 公式: (3 + 1*2) * multiplier = 5 * multiplier
+      expect(calculateUpgradeCost(1, 'N')).toBe(5);
+      expect(calculateUpgradeCost(1, 'R')).toBe(10);
+      expect(calculateUpgradeCost(1, 'SR')).toBe(15);
+      expect(calculateUpgradeCost(1, 'SSR')).toBe(25);
+    });
+
+    it('高レベルのコストも正確に計算できる', () => {
+      // 公式: (3 + 9*2) * 5 = 21 * 5 = 105
+      expect(calculateUpgradeCost(9, 'SSR')).toBe(105);
+    });
   });
 
   describe('canUpgradeCard', () => {
@@ -52,6 +65,18 @@ describe('CardUpgrade', () => {
     it('最大レベルではfalseを返す', () => {
       const card = createTestCard({ level: MAX_CARD_LEVEL });
       expect(canUpgradeCard(card, 9999)).toBe(false);
+    });
+
+    it('石がコストとちょうど同じならtrueを返す', () => {
+      const card = createTestCard({ level: 1, rarity: 'N' });
+      const exactCost = calculateUpgradeCost(1, 'N');
+      expect(canUpgradeCard(card, exactCost)).toBe(true);
+    });
+
+    it('石がコストより1少ないとfalseを返す', () => {
+      const card = createTestCard({ level: 1, rarity: 'N' });
+      const exactCost = calculateUpgradeCost(1, 'N');
+      expect(canUpgradeCard(card, exactCost - 1)).toBe(false);
     });
   });
 
@@ -90,6 +115,31 @@ describe('CardUpgrade', () => {
       const increaseN = resultN.power - cardN.power;
       const increaseSSR = resultSSR.power - cardSSR.power;
       expect(increaseSSR).toBeGreaterThan(increaseN);
+    });
+
+    it('レアリティごとのパワー上昇量が正確', () => {
+      const testCases: Array<{ rarity: 'N' | 'R' | 'SR' | 'SSR'; expected: number }> = [
+        { rarity: 'N', expected: 2 },
+        { rarity: 'R', expected: 3 },
+        { rarity: 'SR', expected: 4 },
+        { rarity: 'SSR', expected: 5 },
+      ];
+      for (const { rarity, expected } of testCases) {
+        const card = createTestCard({ level: 1, power: 10, rarity });
+        const result = upgradeCard(card);
+        expect(result.power - card.power).toBe(expected);
+      }
+    });
+
+    it('レベル9→10に強化できるが10からは強化できない', () => {
+      const card = createTestCard({ level: 9, power: 30 });
+      const upgraded = upgradeCard(card);
+      expect(upgraded.level).toBe(10);
+      expect(upgraded.power).toBeGreaterThan(30);
+
+      const blocked = upgradeCard(upgraded);
+      expect(blocked.level).toBe(10);
+      expect(blocked.power).toBe(upgraded.power);
     });
   });
 });

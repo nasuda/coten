@@ -1,0 +1,536 @@
+/* ============================================================
+   言霊大戦 専用スタイル
+   ============================================================ */
+
+/* --- TCGタイトル画面 --- */
+.tcg-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+.tcg-title h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--accent, #f59e0b), #ef4444);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tcg-title .subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #9ca3af);
+  margin-bottom: 2rem;
+}
+
+/* --- 対戦相手選択 --- */
+.opponent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 2rem;
+}
+
+.opponent-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--surface, #1e1e2e);
+  border: 2px solid var(--border, #333);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.opponent-card:hover {
+  border-color: var(--accent, #f59e0b);
+  transform: translateY(-2px);
+}
+
+.opponent-card .emoji {
+  font-size: 2rem;
+}
+
+.opponent-card .info {
+  text-align: left;
+  flex: 1;
+}
+
+.opponent-card .info .name {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.opponent-card .info .desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #9ca3af);
+  margin-top: 0.25rem;
+}
+
+.opponent-card .difficulty-badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: bold;
+}
+
+.difficulty-beginner {
+  background: #065f46;
+  color: #6ee7b7;
+}
+
+.difficulty-intermediate {
+  background: #92400e;
+  color: #fcd34d;
+}
+
+.difficulty-expert {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+
+/* --- バトルフィールド --- */
+.tcg-battle {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0.5rem;
+  gap: 0.5rem;
+}
+
+.tcg-battle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.tcg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+.tcg-field-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.tcg-field-row.opponent-row {
+  transform: scale(0.85);
+  opacity: 0.9;
+}
+
+.tcg-slot {
+  width: 100px;
+  min-height: 130px;
+  border: 2px dashed var(--border, #444);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  font-size: 0.75rem;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.tcg-slot.occupied {
+  border-style: solid;
+  background: var(--surface, #1e1e2e);
+}
+
+.tcg-slot.targetable {
+  border-color: #ef4444;
+  cursor: pointer;
+  animation: pulse-border 1s infinite;
+}
+
+.tcg-slot.placeable {
+  border-color: var(--accent, #f59e0b);
+  cursor: pointer;
+}
+
+.tcg-slot .verb-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.tcg-slot .verb-type {
+  font-size: 0.65rem;
+  color: var(--text-secondary, #9ca3af);
+}
+
+.tcg-slot .hp-bar {
+  width: 90%;
+  height: 6px;
+  background: #333;
+  border-radius: 3px;
+  margin-top: 0.3rem;
+  overflow: hidden;
+}
+
+.tcg-slot .hp-bar-fill {
+  height: 100%;
+  background: #22c55e;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.tcg-slot .hp-bar-fill.low {
+  background: #ef4444;
+}
+
+.tcg-slot .equipped-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--accent, #f59e0b);
+  color: #000;
+  font-size: 0.6rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+/* --- VS表示 --- */
+.tcg-vs-divider {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ef4444;
+  padding: 0.25rem;
+}
+
+/* --- 手札 --- */
+.tcg-hand {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tcg-hand-card {
+  width: 70px;
+  min-height: 90px;
+  border-radius: 8px;
+  border: 2px solid var(--border, #444);
+  background: var(--surface, #1e1e2e);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tcg-hand-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent, #f59e0b);
+}
+
+.tcg-hand-card.selected {
+  border-color: var(--accent, #f59e0b);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+  transform: translateY(-8px);
+}
+
+.tcg-hand-card .card-name {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.tcg-hand-card .card-type {
+  font-size: 0.6rem;
+  color: var(--text-secondary, #9ca3af);
+}
+
+.tcg-hand-card.verb-card {
+  border-color: #3b82f6;
+}
+
+.tcg-hand-card.jodoushi-card {
+  border-color: #a855f7;
+}
+
+/* --- アクションボタン --- */
+.tcg-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+.tcg-actions button {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tcg-actions .btn-attack {
+  background: #ef4444;
+  color: white;
+}
+
+.tcg-actions .btn-pass {
+  background: #6b7280;
+  color: white;
+}
+
+.tcg-actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* --- 活用形選択クイズ --- */
+.tcg-quiz-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1.5rem;
+}
+
+.tcg-quiz-box {
+  background: var(--surface, #1e1e2e);
+  border-radius: 16px;
+  padding: 1.5rem;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+}
+
+.tcg-quiz-box h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.tcg-quiz-prompt {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #9ca3af);
+  margin-bottom: 1rem;
+}
+
+.tcg-quiz-forms {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.tcg-quiz-forms button {
+  padding: 0.7rem;
+  border-radius: 8px;
+  border: 2px solid var(--border, #444);
+  background: transparent;
+  color: var(--text, #e5e7eb);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tcg-quiz-forms button:hover {
+  border-color: var(--accent, #f59e0b);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.tcg-quiz-forms button.correct {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.tcg-quiz-forms button.wrong {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+/* --- バトルログ --- */
+.tcg-log {
+  max-height: 60px;
+  overflow-y: auto;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.7rem;
+  color: var(--text-secondary, #9ca3af);
+  text-align: center;
+}
+
+/* --- 結果画面 --- */
+.tcg-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  text-align: center;
+  gap: 1rem;
+}
+
+.tcg-result h1 {
+  font-size: 2.5rem;
+}
+
+.tcg-result .stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: var(--surface, #1e1e2e);
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 320px;
+}
+
+.tcg-result .stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.tcg-result .stat-label {
+  color: var(--text-secondary, #9ca3af);
+}
+
+.tcg-result .stat-value {
+  font-weight: bold;
+}
+
+.tcg-result .accuracy-highlight {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--accent, #f59e0b);
+}
+
+/* --- デッキ編集画面 --- */
+.tcg-deck-edit {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.tcg-deck-edit h2 {
+  text-align: center;
+}
+
+.tcg-deck-section {
+  background: var(--surface, #1e1e2e);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.tcg-deck-section h3 {
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-secondary, #9ca3af);
+}
+
+.tcg-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.5rem;
+}
+
+.tcg-card-pick {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 2px solid var(--border, #444);
+  background: transparent;
+  color: var(--text, #e5e7eb);
+  font-size: 0.75rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tcg-card-pick.selected {
+  border-color: var(--accent, #f59e0b);
+  background: rgba(245, 158, 11, 0.15);
+}
+
+.tcg-card-pick .pick-name {
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+/* --- アニメーション --- */
+@keyframes pulse-border {
+  0%, 100% { border-color: #ef4444; }
+  50% { border-color: #fca5a5; }
+}
+
+@keyframes card-play {
+  0% { transform: scale(1.2); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.card-played {
+  animation: card-play 0.3s ease-out;
+}
+
+@keyframes damage-flash {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(2); }
+}
+
+.damage-flash {
+  animation: damage-flash 0.3s;
+}
+
+/* --- タイマーバー --- */
+.tcg-timer {
+  width: 100%;
+  height: 4px;
+  background: #333;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.tcg-timer-fill {
+  height: 100%;
+  background: var(--accent, #f59e0b);
+  transition: width 0.1s linear;
+}
+
+.tcg-timer-fill.urgent {
+  background: #ef4444;
+}
+
+/* --- 戻るボタン --- */
+.tcg-back-btn {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: transparent;
+  border: 1px solid var(--border, #444);
+  color: var(--text, #e5e7eb);
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}

@@ -109,9 +109,29 @@ export function renderResultScreen(result: BattleResult, turnResults: TurnResult
     btnArea.appendChild(menuBtn);
     btnArea.appendChild(nextBtn);
 
+    // 復習セクション（不正解がある場合）
+    const wrongTurns = turnResults.filter(t => !t.correct && t.correctJodoushiName);
+    let reviewSection: HTMLElement | null = null;
+    if (wrongTurns.length > 0) {
+      reviewSection = el('div', { class: 'result-review' });
+      reviewSection.appendChild(el('div', { class: 'result-review-title' }, '復習'));
+      for (const t of wrongTurns) {
+        const item = el('div', { class: 'result-review-item' });
+        item.appendChild(el('div', { class: 'result-review-question' }, t.questionText ?? ''));
+        const answerLine = el('div', { class: 'result-review-answer' });
+        answerLine.appendChild(el('span', { class: 'text-green' }, `正解:「${t.correctJodoushiName}」`));
+        if (t.explanation) {
+          answerLine.appendChild(el('span', { class: 'result-review-hint' }, ` → ${t.explanation}`));
+        }
+        item.appendChild(answerLine);
+        reviewSection.appendChild(item);
+      }
+    }
+
     screen.appendChild(title);
     screen.appendChild(stars);
     screen.appendChild(stats);
+    if (reviewSection) screen.appendChild(reviewSection);
     screen.appendChild(btnArea);
 
     return screen;

@@ -161,6 +161,7 @@ export interface BattleState {
   phase: BattlePhase;
   log: string[];
   turnResults: TurnResult[];
+  chapter: number;
 }
 
 export type BattlePhase =
@@ -186,6 +187,11 @@ export interface TurnResult {
   questionType: QuestionType;
   answeredJodoushiId: string;
   timeElapsed: number;
+  // 復習用（不正解時）
+  correctJodoushiName?: string;
+  selectedJodoushiName?: string;
+  questionText?: string;
+  explanation?: string;
 }
 
 // --- バトル結果 ---
@@ -264,7 +270,7 @@ export interface SaveData {
 }
 
 // --- 画面タイプ ---
-export type ScreenType = 'title' | 'menu' | 'world' | 'battle' | 'result' | 'gacha' | 'zukan' | 'card_upgrade' | 'deck_edit' | 'boss_rush';
+export type ScreenType = 'title' | 'menu' | 'world' | 'battle' | 'result' | 'gacha' | 'zukan' | 'card_upgrade' | 'deck_edit' | 'boss_rush' | 'howtoplay';
 
 // --- ダメージ計算入力 ---
 export interface DamageInput {
@@ -317,3 +323,11 @@ export const COMBO_GAUGE_PENALTY = 0.5;  // wrong answer: gauge × this
 
 // --- 反撃ダメージ ---
 export const ENEMY_COUNTER_RATIO = 0.125;  // 12.5% of player maxHP
+
+// --- チャプター別難易度スケーリング ---
+export const CHAPTER_TIME_LIMITS: Record<number, number> = {
+  1: 15, 2: 15, 3: 12, 4: 12, 5: 10,
+};
+export const CHAPTER_COUNTER_RATIOS: Record<number, number> = {
+  1: 0.08, 2: 0.08, 3: 0.10, 4: 0.10, 5: 0.125,
+};

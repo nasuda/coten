@@ -33,8 +33,7 @@ function renderBossRushIntro(): void {
     const bossListEl = el('div', { class: 'boss-rush-boss-list' });
     const bosses = getBossRushBosses();
 
-    for (let i = 0; i < bosses.length; i++) {
-      const boss = bosses[i]!;
+    for (const boss of bosses) {
       const bossItem = el('div', { class: 'boss-rush-boss-item' });
       bossItem.appendChild(el('span', { style: 'font-size: 1.5rem' }, boss.emoji));
       bossItem.appendChild(el('span', { style: 'font-weight: 700' }, boss.name));

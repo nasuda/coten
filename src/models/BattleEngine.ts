@@ -3,7 +3,7 @@
 // ============================================================
 
 import type { BattleState, Enemy, SkillCard, TurnResult, BattleResult, StarRating } from './types.ts';
-import { COMBO_GAUGE_PER_CORRECT, COMBO_GAUGE_PENALTY, ENEMY_COUNTER_RATIO } from './types.ts';
+import { COMBO_GAUGE_PER_CORRECT, COMBO_GAUGE_PENALTY, ENEMY_COUNTER_RATIO, CHAPTER_TIME_LIMITS, CHAPTER_COUNTER_RATIOS } from './types.ts';
 import { calculateDamage, calculateSpeedBonus, calculateElementBonus, calculateComboMultiplier, calculateCounterDamage } from './DamageCalculator.ts';
 import { calculateStarRating } from './ProgressManager.ts';
 import { getCardPower } from '../data/cards.ts';
@@ -11,12 +11,13 @@ import { getCardPower } from '../data/cards.ts';
 export function createBattleState(
   enemy: Enemy,
   hand: SkillCard[],
-  _chapter: number,
+  chapter: number,
   playerMaxHP: number,
   playerAttack: number,
 ): BattleState {
   const maxTurns = enemy.isBoss ? 6 : 4 + Math.floor(Math.random() * 2);
-  const timeLimit = enemy.gimmick?.type === 'timeAccel' ? enemy.gimmick.value : 10;
+  const baseTimeLimit = CHAPTER_TIME_LIMITS[chapter] ?? 10;
+  const timeLimit = enemy.gimmick?.type === 'timeAccel' ? enemy.gimmick.value : baseTimeLimit;
 
   return {
     enemy,
@@ -36,6 +37,7 @@ export function createBattleState(
     phase: 'intro',
     log: [],
     turnResults: [],
+    chapter,
   };
 }
 
@@ -48,7 +50,12 @@ export function processTurnAnswer(
   const newState = { ...state };
   newState.turn = state.turn + 1;
 
-  const card = state.hand[cardIndex] ?? state.hand[0]!;
+  // 選択肢から実際のカードを取得（手札フォールバックはテスト用）
+  const choiceCard = state.currentQuestion?.choices[cardIndex];
+  const card = (choiceCard && state.hand.find(h => h.jodoushiId === choiceCard.jodoushiId))
+    ?? choiceCard
+    ?? state.hand[cardIndex]
+    ?? state.hand[0]!;
   const speedResult = calculateSpeedBonus(timeElapsed);
 
   let damage = 0;
@@ -85,7 +92,8 @@ export function processTurnAnswer(
     combo = 0;
     comboGauge = Math.floor(comboGauge * COMBO_GAUGE_PENALTY);
 
-    const counterDamage = calculateCounterDamage(state.playerMaxHP, ENEMY_COUNTER_RATIO);
+    const counterRatio = CHAPTER_COUNTER_RATIOS[state.chapter] ?? ENEMY_COUNTER_RATIO;
+    const counterDamage = calculateCounterDamage(state.playerMaxHP, counterRatio);
     const actualCounter = state.enemy.gimmick?.type === 'reflect'
       ? Math.floor(counterDamage * state.enemy.gimmick.value)
       : counterDamage;
@@ -106,6 +114,10 @@ export function processTurnAnswer(
     newState.log = [...newState.log, `${state.enemy.name}がHP${healAmount}回復！`];
   }
 
+  // 復習用データ
+  const question = state.currentQuestion;
+  const correctChoice = question ? question.choices[question.correctCardIndex] : undefined;
+
   const turnResult: TurnResult = {
     turn: newState.turn,
     correct,
@@ -114,8 +126,12 @@ export function processTurnAnswer(
     comboMultiplier: calculateComboMultiplier(combo),
     elementBonus: calculateElementBonus(card.element, state.enemy.element),
     questionType: state.currentQuestion?.type ?? 'connection',
-    answeredJodoushiId: card.jodoushiId,
+    answeredJodoushiId: correctChoice?.jodoushiId ?? choiceCard?.jodoushiId ?? card.jodoushiId,
     timeElapsed,
+    correctJodoushiName: correctChoice?.name,
+    selectedJodoushiName: choiceCard?.name ?? card.name,
+    questionText: question?.displayText,
+    explanation: question?.template.hint ?? question?.template.targetMeaning ?? question?.template.targetAnswer,
   };
 
   newState.turnResults = [...state.turnResults, turnResult];

@@ -53,7 +53,7 @@ export function renderCardUpgradeScreen(): void {
 
       const nameEl = el('div', { class: `upgrade-card-name element-${card.element}` });
       nameEl.appendChild(el('span', { class: `rarity-${card.rarity}`, style: 'font-size: 0.7rem; margin-right: 4px' }, card.rarity));
-      nameEl.appendChild(document.createTextNode(card.name));
+      nameEl.appendChild(el('span', {}, card.name));
       item.appendChild(nameEl);
 
       const statsEl = el('div', { class: 'upgrade-card-stats' });
@@ -100,7 +100,12 @@ export function renderCardUpgradeScreen(): void {
 
           // セーブデータ内のカードを更新
           const idx = save.player.cards.findIndex(c => c.id === card.id);
-          if (idx !== -1) save.player.cards[idx] = upgraded;
+          if (idx === -1) {
+            save.player.stones += cost;
+            console.error(`カード強化: カードID "${card.id}" がセーブデータに見つかりません`);
+            return;
+          }
+          save.player.cards[idx] = upgraded;
           saveSaveData(save);
 
           playUpgrade();
