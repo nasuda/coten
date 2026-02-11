@@ -37,10 +37,10 @@ function createTestBattleResult(overrides: Partial<BattleResult> = {}): BattleRe
 
 function createTestTurnResults(): TurnResult[] {
   return [
-    { turn: 1, correct: true, damage: 20, speedBonus: 1.3, comboMultiplier: 1.0, elementBonus: 1.0, questionType: 'connection', answeredJodoushiId: 'ru', timeElapsed: 2 },
-    { turn: 2, correct: true, damage: 25, speedBonus: 1.0, comboMultiplier: 1.15, elementBonus: 1.0, questionType: 'meaning', answeredJodoushiId: 'zu', timeElapsed: 5 },
-    { turn: 3, correct: false, damage: 0, speedBonus: 0.8, comboMultiplier: 1.0, elementBonus: 1.0, questionType: 'connection', answeredJodoushiId: 'su', timeElapsed: 9 },
-    { turn: 4, correct: true, damage: 30, speedBonus: 1.3, comboMultiplier: 1.0, elementBonus: 1.5, questionType: 'conjugation', answeredJodoushiId: 'ru', timeElapsed: 1 },
+    { turn: 1, correct: true, damage: 20, speedBonus: 1.3, comboMultiplier: 1.0, elementBonus: 1.0, questionType: 'connection', askedJodoushiId: 'ru', selectedJodoushiId: 'ru', timeElapsed: 2 },
+    { turn: 2, correct: true, damage: 25, speedBonus: 1.0, comboMultiplier: 1.15, elementBonus: 1.0, questionType: 'meaning', askedJodoushiId: 'zu', selectedJodoushiId: 'zu', timeElapsed: 5 },
+    { turn: 3, correct: false, damage: 0, speedBonus: 0.8, comboMultiplier: 1.0, elementBonus: 1.0, questionType: 'connection', askedJodoushiId: 'su', selectedJodoushiId: 'raru', timeElapsed: 9 },
+    { turn: 4, correct: true, damage: 30, speedBonus: 1.3, comboMultiplier: 1.0, elementBonus: 1.5, questionType: 'conjugation', askedJodoushiId: 'ru', selectedJodoushiId: 'ru', timeElapsed: 1 },
   ];
 }
 

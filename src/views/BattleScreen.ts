@@ -7,6 +7,7 @@ import { playCorrect, playWrong, playHit, playCombo, playSpecial, playVictory, p
 import { getOrCreateSave } from '../utils/storage.ts';
 import { createBattleState, processTurnAnswer, processSpecialAttack, checkBattleEnd, createBattleResult } from '../models/BattleEngine.ts';
 import { generateQuestion, selectQuestionType } from '../models/QuestionGenerator.ts';
+import { buildWeaknessProfile } from '../models/WeaknessTracker.ts';
 import { calculatePlayerStats } from '../models/ProgressManager.ts';
 import { getStageById } from '../data/stages.ts';
 import { createHPBar, updateHPBar } from './components/HPBar.ts';
@@ -70,13 +71,14 @@ export function renderBattleScreen(stageId: string, enemy: Enemy): void {
       playSpecial();
       await showCutinOverlay(state.hand[0]?.jodoushiId ?? 'zu');
 
+      const prevEnemyHP = state.enemyCurrentHP;
       state = processSpecialAttack(state, 0);
 
       updateHPBar(enemyHPBar, state.enemyCurrentHP, state.enemy.maxHP);
       updateComboGauge(comboGauge, state.combo, state.comboGauge);
       updateSpecialBtn();
       shakeEnemy(enemySprite);
-      showDamageNumber(screen, state.enemy.maxHP - state.enemyCurrentHP, 'player', true);
+      showDamageNumber(screen, prevEnemyHP - state.enemyCurrentHP, 'player', true);
 
       await waitMs(800);
 
@@ -139,7 +141,7 @@ export function renderBattleScreen(stageId: string, enemy: Enemy): void {
         : undefined;
 
       const prevHP = state.playerCurrentHP;
-      const result = processTurnAnswer(state, false, timeElapsed, 0);
+      const result = processTurnAnswer(state, false, timeElapsed, -1);
       state = result.state;
 
       updateHPBar(playerHPBar, state.playerCurrentHP, state.playerMaxHP);
@@ -247,7 +249,9 @@ export function renderBattleScreen(stageId: string, enemy: Enemy): void {
       const isBoss = enemy.isBoss;
       const qType = selectQuestionType(chapter, isBoss);
       const numChoices = enemy.gimmick?.type === 'extraChoices' ? enemy.gimmick.value : 5;
-      const question = generateQuestion(chapter, state.hand, qType, numChoices);
+      const currentSave = getOrCreateSave();
+      const weakness = buildWeaknessProfile(currentSave.zukanJodoushi);
+      const question = generateQuestion(chapter, state.hand, qType, numChoices, weakness);
 
       if (!question) {
         console.error(`バトル: チャプター ${chapter} で問題生成に失敗。手札数: ${state.hand.length}, タイプ: ${qType}`);

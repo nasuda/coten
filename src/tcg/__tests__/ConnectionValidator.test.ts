@@ -111,6 +111,18 @@ describe('ConnectionValidator', () => {
       const result = checkConnection(jodoushi('su'), verb('v_miru'));
       expect(result.canConnect).toBe(false);
     });
+
+    it('ラ変「あり」に「る」→ 接続可能', () => {
+      const result = checkConnection(jodoushi('ru'), verb('v_ari'));
+      expect(result.canConnect).toBe(true);
+      expect(result.requiredForm).toBe('あら');
+    });
+
+    it('ラ変「あり」に「す」→ 接続可能', () => {
+      const result = checkConnection(jodoushi('su'), verb('v_ari'));
+      expect(result.canConnect).toBe(true);
+      expect(result.requiredForm).toBe('あら');
+    });
   });
 
   // === らる/さす: 四段・ナ変・ラ変以外 ===
@@ -131,6 +143,17 @@ describe('ConnectionValidator', () => {
       const result = checkConnection(jodoushi('sasu'), verb('v_su'));
       expect(result.canConnect).toBe(true);
       expect(result.requiredForm).toBe('せ');
+    });
+
+    it('ラ変「あり」に「らる」→ 接続不可', () => {
+      const result = checkConnection(jodoushi('raru'), verb('v_ari'));
+      expect(result.canConnect).toBe(false);
+      expect(result.reason).toContain('四段・ナ変・ラ変以外');
+    });
+
+    it('ナ変「死ぬ」に「さす」→ 接続不可', () => {
+      const result = checkConnection(jodoushi('sasu'), verb('v_shinu'));
+      expect(result.canConnect).toBe(false);
     });
   });
 

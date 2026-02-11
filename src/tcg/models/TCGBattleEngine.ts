@@ -265,6 +265,7 @@ export function resolvePhase(state: TCGBattleState): TCGBattleState {
   const newPlayer = resetAttackFlags(state.player);
   const newOpponent = resetAttackFlags(state.opponent);
 
+  // フィールドの生存動詞 + 手札/デッキの未配置動詞を含む全生存チェック
   const playerAlive = countAliveVerbs(newPlayer);
   const opponentAlive = countAliveVerbs(newOpponent);
 
@@ -272,8 +273,8 @@ export function resolvePhase(state: TCGBattleState): TCGBattleState {
   let phase = state.phase;
 
   if (opponentAlive === 0 && playerAlive === 0) {
-    winner = 'player'; // draw→player wins
-    phase = 'victory';
+    winner = null;
+    phase = 'draw_game';
   } else if (opponentAlive === 0) {
     winner = 'player';
     phase = 'victory';
@@ -316,12 +317,12 @@ function resetAttackFlags(ps: TCGPlayerState): TCGPlayerState {
 }
 
 export function countAliveVerbs(ps: TCGPlayerState): number {
-  return ps.field.filter(s => s !== null && s.currentHP > 0).length +
+  return countFieldAlive(ps) +
     ps.hand.filter(c => c.type === 'verb').length +
     ps.deck.filter(c => c.type === 'verb').length;
 }
 
-function countFieldAlive(ps: TCGPlayerState): number {
+export function countFieldAlive(ps: TCGPlayerState): number {
   return ps.field.filter(s => s !== null && s.currentHP > 0).length;
 }
 

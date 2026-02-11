@@ -2,16 +2,18 @@
 // 問題生成エンジン
 // ============================================================
 
-import type { BattleQuestion, QuestionType, SkillCard } from './types.ts';
+import type { BattleQuestion, QuestionType, SkillCard, WeaknessProfile } from './types.ts';
 import { allQuestions } from '../data/questions.ts';
 import { allJodoushi } from '../data/jodoushi.ts';
 import { shuffle } from '../utils/shuffle.ts';
+import { weightQuestions, weightedRandomPick } from './WeaknessTracker.ts';
 
 export function generateQuestion(
   chapter: number,
   hand: SkillCard[],
   preferredType?: QuestionType,
   numChoices: number = 5,
+  weakness?: WeaknessProfile,
 ): BattleQuestion | null {
   // chapter以下の問題から候補を絞る
   const availableQuestions = allQuestions.filter(q => q.chapter <= chapter);
@@ -29,7 +31,15 @@ export function generateQuestion(
   const handMatchable = candidates.filter(q => handJodoushiIds.has(q.correctJodoushiId));
 
   const pool = handMatchable.length > 0 ? handMatchable : candidates;
-  const template = pool[Math.floor(Math.random() * pool.length)]!;
+
+  // 弱点プロファイルが渡されたら重み付き選択
+  let template;
+  if (weakness) {
+    const weighted = weightQuestions(pool, weakness);
+    template = weightedRandomPick(weighted.map(w => ({ item: w.question, weight: w.weight })));
+  } else {
+    template = pool[Math.floor(Math.random() * pool.length)]!;
+  }
 
   // 正解カードを特定
   const correctJodoushi = allJodoushi.find(j => j.id === template.correctJodoushiId);
@@ -45,18 +55,20 @@ export function generateQuestion(
     power: correctJodoushi.basePower,
   };
 
-  // ダミー選択肢を生成
-  const dummyPool = allJodoushi
-    .filter(j => j.id !== template.correctJodoushiId)
-    .map(j => ({
-      id: `dummy_${j.id}`,
-      jodoushiId: j.id,
-      name: j.name,
-      rarity: j.rarity,
-      element: j.element,
-      level: 1,
-      power: j.basePower,
-    } as SkillCard));
+  // ダミー選択肢を生成（同じ章以下の助動詞を優先し、不足時は全体からフォールバック）
+  const chapterFiltered = allJodoushi.filter(j => j.id !== template.correctJodoushiId && j.chapter <= chapter);
+  const dummySource = chapterFiltered.length >= numChoices - 1
+    ? chapterFiltered
+    : allJodoushi.filter(j => j.id !== template.correctJodoushiId);
+  const dummyPool = dummySource.map(j => ({
+    id: `dummy_${j.id}`,
+    jodoushiId: j.id,
+    name: j.name,
+    rarity: j.rarity,
+    element: j.element,
+    level: 1,
+    power: j.basePower,
+  } as SkillCard));
 
   const result = generateChoices(correctCard, dummyPool, numChoices);
 

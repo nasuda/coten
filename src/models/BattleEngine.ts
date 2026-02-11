@@ -51,10 +51,12 @@ export function processTurnAnswer(
   newState.turn = state.turn + 1;
 
   // 選択肢から実際のカードを取得（手札フォールバックはテスト用）
-  const choiceCard = state.currentQuestion?.choices[cardIndex];
+  // cardIndex < 0 はタイムアウト（未選択）を示す
+  const isTimeout = cardIndex < 0;
+  const choiceCard = isTimeout ? undefined : state.currentQuestion?.choices[cardIndex];
   const card = (choiceCard && state.hand.find(h => h.jodoushiId === choiceCard.jodoushiId))
     ?? choiceCard
-    ?? state.hand[cardIndex]
+    ?? state.hand[Math.max(0, cardIndex)]
     ?? state.hand[0]!;
   const speedResult = calculateSpeedBonus(timeElapsed);
 
@@ -126,10 +128,11 @@ export function processTurnAnswer(
     comboMultiplier: calculateComboMultiplier(combo),
     elementBonus: calculateElementBonus(card.element, state.enemy.element),
     questionType: state.currentQuestion?.type ?? 'connection',
-    answeredJodoushiId: correctChoice?.jodoushiId ?? choiceCard?.jodoushiId ?? card.jodoushiId,
+    askedJodoushiId: correctChoice?.jodoushiId ?? card.jodoushiId,
+    selectedJodoushiId: isTimeout ? '' : (choiceCard?.jodoushiId ?? card.jodoushiId),
     timeElapsed,
     correctJodoushiName: correctChoice?.name,
-    selectedJodoushiName: choiceCard?.name ?? card.name,
+    selectedJodoushiName: isTimeout ? undefined : (choiceCard?.name ?? card.name),
     questionText: question?.displayText,
     explanation: question?.template.hint ?? question?.template.targetMeaning ?? question?.template.targetAnswer,
   };

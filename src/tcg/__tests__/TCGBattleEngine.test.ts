@@ -134,6 +134,18 @@ describe('TCGBattleEngine', () => {
       expect(after.connectionHistory).toHaveLength(1);
       expect(after.connectionHistory[0]?.isCorrect).toBe(false);
     });
+
+    it('既に助動詞が装備されているスロットには装備できない', () => {
+      const state = setupFieldState();
+      // 1回目: 正解で装備
+      const after1 = equipJodoushi(state, 'player', 0, 0, '書か');
+      expect(after1.player.field[0]?.equippedJodoushi).not.toBe(null);
+      // 2回目: 別の助動詞で装備しようとしても無効
+      const jIdx = after1.player.hand.findIndex(c => c.type === 'jodoushi');
+      if (jIdx === -1) return;
+      const after2 = equipJodoushi(after1, 'player', jIdx, 0, '書き');
+      expect(after2).toBe(after1); // 状態変わらず
+    });
   });
 
   describe('attack', () => {
@@ -190,6 +202,16 @@ describe('TCGBattleEngine', () => {
       // スロット1には何もない
       const after = attack(state, 'player', 1, 0);
       expect(after).toBe(state); // 状態変わらず
+    });
+
+    it('hasAttacked=trueのカードでは攻撃できない', () => {
+      const state = setupBattleState();
+      // 1回目の攻撃
+      const after1 = attack(state, 'player', 0, 0);
+      expect(after1.player.field[0]?.hasAttacked).toBe(true);
+      // 2回目の攻撃は無効（装備も外れている）
+      const after2 = attack(after1, 'player', 0, 0);
+      expect(after2).toBe(after1);
     });
   });
 
@@ -248,6 +270,58 @@ describe('TCGBattleEngine', () => {
       };
       const after = resolvePhase(s);
       expect(after.winner).toBe('player');
+    });
+
+    it('両者の全動詞撃破で引き分け', () => {
+      const state = createBattleState(testPlayerDeck, testOpponentDeck, 'テスト');
+      const emptyPlayer: TCGPlayerState = {
+        ...state.player,
+        field: [null, null, null],
+        hand: state.player.hand.filter(c => c.type !== 'verb'),
+        deck: state.player.deck.filter(c => c.type !== 'verb'),
+      };
+      const emptyOpponent: TCGPlayerState = {
+        ...state.opponent,
+        field: [null, null, null],
+        hand: state.opponent.hand.filter(c => c.type !== 'verb'),
+        deck: state.opponent.deck.filter(c => c.type !== 'verb'),
+      };
+      const s = { ...state, player: emptyPlayer, opponent: emptyOpponent };
+      const after = resolvePhase(s);
+      expect(after.winner).toBe(null);
+      expect(after.phase).toBe('draw_game');
+    });
+
+    it('最大ラウンドでHP同点ならプレイヤー勝利', () => {
+      const kaku = getVerbById('v_kaku')!;
+      const tatsu = getVerbById('v_tatsu')!;
+      const state = createBattleState(testPlayerDeck, testOpponentDeck, 'テスト');
+
+      const s: TCGBattleState = {
+        ...state,
+        currentRound: 7,
+        player: {
+          ...state.player,
+          field: [
+            { card: kaku, currentHP: 10, equippedJodoushi: null, hasAttacked: false },
+            null, null,
+          ],
+          hand: [],
+          deck: [],
+        },
+        opponent: {
+          ...state.opponent,
+          field: [
+            { card: tatsu, currentHP: 10, equippedJodoushi: null, hasAttacked: false },
+            null, null,
+          ],
+          hand: [],
+          deck: [],
+        },
+      };
+      const after = resolvePhase(s);
+      expect(after.winner).toBe('player');
+      expect(after.phase).toBe('victory');
     });
   });
 

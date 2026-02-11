@@ -185,7 +185,8 @@ export interface TurnResult {
   comboMultiplier: number;
   elementBonus: number;
   questionType: QuestionType;
-  answeredJodoushiId: string;
+  askedJodoushiId: string;
+  selectedJodoushiId: string;
   timeElapsed: number;
   // 復習用（不正解時）
   correctJodoushiName?: string;
@@ -227,6 +228,12 @@ export interface ZukanJodoushiEntry {
   correctCount: number;
   totalCount: number;
   masteryLevel: number;  // 0-5
+  typeStats?: Partial<Record<QuestionType, { correct: number; total: number }>>;
+}
+
+export interface WeaknessProfile {
+  jodoushiWeakness: Map<string, number>;  // jodoushiId → weight (0.5~4.0)
+  typeWeakness: Record<QuestionType, number>;  // questionType → weight
 }
 
 export interface ZukanEnemyEntry {
@@ -269,8 +276,17 @@ export interface SaveData {
   lastPlayed: string;
 }
 
+// --- ユーザープロフィール ---
+export interface UserProfile {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
+export const MAX_PROFILES = 3;
+
 // --- 画面タイプ ---
-export type ScreenType = 'title' | 'menu' | 'world' | 'battle' | 'result' | 'gacha' | 'zukan' | 'card_upgrade' | 'deck_edit' | 'boss_rush' | 'howtoplay';
+export type ScreenType = 'title' | 'profile_select' | 'menu' | 'world' | 'battle' | 'result' | 'gacha' | 'zukan' | 'card_upgrade' | 'deck_edit' | 'boss_rush' | 'howtoplay';
 
 // --- ダメージ計算入力 ---
 export interface DamageInput {

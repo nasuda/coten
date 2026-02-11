@@ -151,7 +151,8 @@ function renderSlot(slot: TCGFieldSlot, index: number, who: 'player' | 'opponent
           actionMode = 'idle';
           // renderBattleUI will be called from the parent
           const container = slotEl.closest('.tcg-battle') as HTMLElement;
-          if (container) renderBattleUI(container, getCurrentOpponent());
+          const opp = getCurrentOpponent();
+          if (container && opp) renderBattleUI(container, opp);
         }
       });
     }
@@ -212,7 +213,9 @@ function renderSlot(slot: TCGFieldSlot, index: number, who: 'player' | 'opponent
         playHit();
         battleState = attack(battleState, 'player', equippedSlots[0]!, index);
         actionMode = 'idle';
-        endPlayerTurn(slotEl.closest('.tcg-battle') as HTMLElement, getCurrentOpponent());
+        const battleContainer = slotEl.closest('.tcg-battle') as HTMLElement;
+        const opp = getCurrentOpponent();
+        if (battleContainer && opp) endPlayerTurn(battleContainer, opp);
       }
     });
   }
@@ -274,8 +277,10 @@ function showConnectionQuiz(
   for (const choice of choices) {
     const btn = el('button', {}, `${choice.form}（${choice.label}）`);
     onClick(btn, () => {
-      const container = document.querySelector('.tcg-battle') as HTMLElement;
+      const container = document.querySelector('.tcg-battle');
+      if (!container) return;
       const opponent = getCurrentOpponent();
+      if (!opponent) return;
 
       battleState = equipJodoushi(battleState, 'player', handIndex, slotIndex, choice.form);
 
@@ -300,7 +305,7 @@ function showConnectionQuiz(
         overlay.remove();
         selectedHandIndex = null;
         actionMode = 'idle';
-        if (container) renderBattleUI(container, opponent);
+        renderBattleUI(container as HTMLElement, opponent);
       }, 800);
     });
     formsGrid.appendChild(btn);
@@ -336,7 +341,7 @@ function endPlayerTurn(container: HTMLElement, opponent: TCGOpponent): void {
   // 解決フェーズ
   battleState = resolvePhase(battleState);
 
-  if (battleState.phase === 'victory' || battleState.phase === 'defeat') {
+  if (battleState.phase === 'victory' || battleState.phase === 'defeat' || battleState.phase === 'draw_game') {
     const result = createBattleResult(battleState, opponent.id);
     applyBattleResult(result);
 
@@ -346,8 +351,11 @@ function endPlayerTurn(container: HTMLElement, opponent: TCGOpponent): void {
       playDefeat();
     }
 
+    const playerHistory = battleState.connectionHistory.filter(h => h.who === 'player');
+
+    stopTimer();
     setTimeout(() => {
-      renderTCGResultScreen(result);
+      renderTCGResultScreen(result, playerHistory);
     }, 600);
     return;
   }
@@ -403,6 +411,6 @@ function getVerbTypeLabel(type: string): string {
   return labels[type] ?? type;
 }
 
-function getCurrentOpponent(): TCGOpponent {
-  return currentOpponentRef!;
+function getCurrentOpponent(): TCGOpponent | null {
+  return currentOpponentRef;
 }

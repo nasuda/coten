@@ -534,3 +534,41 @@
   cursor: pointer;
   font-size: 0.8rem;
 }
+
+/* --- TCG復習セクション --- */
+.tcg-review {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(239, 68, 68, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  text-align: left;
+}
+
+.tcg-review-title {
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  color: #f87171;
+}
+
+.tcg-review-item {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tcg-review-item:last-child { border-bottom: none; }
+
+.tcg-review-question {
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+}
+
+.tcg-review-answer {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #9ca3af);
+}
+
+.tcg-review-correct {
+  color: #34d399;
+}

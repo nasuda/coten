@@ -23,9 +23,19 @@ export function applyBattleResultToSave(
 
   // 助動詞図鑑の更新: 各ターンの回答結果を反映
   for (const tr of turnResults) {
-    const idx = updated.zukanJodoushi.findIndex(z => z.id === tr.answeredJodoushiId);
+    const idx = updated.zukanJodoushi.findIndex(z => z.id === tr.askedJodoushiId);
     if (idx !== -1) {
       updated.zukanJodoushi[idx] = updateJodoushiEntry(updated.zukanJodoushi[idx]!, tr.correct);
+
+      // typeStats 更新
+      const entry = updated.zukanJodoushi[idx]!;
+      const typeStats = entry.typeStats ? { ...entry.typeStats } : {};
+      const prev = typeStats[tr.questionType] ?? { correct: 0, total: 0 };
+      typeStats[tr.questionType] = {
+        correct: prev.correct + (tr.correct ? 1 : 0),
+        total: prev.total + 1,
+      };
+      updated.zukanJodoushi[idx] = { ...entry, typeStats };
     }
   }
 

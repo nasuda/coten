@@ -4,10 +4,14 @@
 
 import { el, onClick, setScreen } from '../utils/render.ts';
 import { initAudio, playTap } from '../utils/audio.ts';
-import { renderMenuScreen } from './MenuScreen.ts';
+import { migrateLegacySave } from '../utils/storage.ts';
+import { renderProfileSelectScreen } from './ProfileSelectScreen.ts';
 import { renderHowToPlayScreen } from './HowToPlayScreen.ts';
 
 export function renderTitleScreen(): void {
+  // 既存の単一セーブデータをプロフィール形式に移行
+  migrateLegacySave();
+
   setScreen('title', () => {
     const screen = el('div', { class: 'title-screen' });
 
@@ -20,7 +24,7 @@ export function renderTitleScreen(): void {
     onClick(startBtn, () => {
       initAudio();
       playTap();
-      renderMenuScreen();
+      renderProfileSelectScreen();
     });
 
     const howtoBtn = el('button', { class: 'btn btn--secondary' }, '📜 遊び方');

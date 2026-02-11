@@ -2,7 +2,7 @@
 // TCG AI行動選択
 // ============================================================
 
-import type { TCGBattleState, TCGAction, AIDifficulty, TCGJodoushiCard } from './tcg-types.ts';
+import type { TCGBattleState, TCGAction, AIDifficulty, TCGJodoushiCard, TCGVerbCardDef } from './tcg-types.ts';
 import {
   getPlayableVerbIndices,
   getEquippableJodoushiIndices,
@@ -42,7 +42,7 @@ export function selectAIAction(
       const verb = ai.field[slotIdx]!;
       const conn = checkConnection(jodoushi, verb.card);
       if (conn.canConnect && conn.requiredForm) {
-        const selectedForm = selectForm(conn.requiredForm, verb.card as unknown as { conjugation: { [key: string]: string } }, difficulty);
+        const selectedForm = selectForm(conn.requiredForm, verb.card, difficulty);
         return { type: 'equip', handIndex: jIdx, slotIndex: slotIdx, selectedForm };
       }
     }
@@ -64,6 +64,7 @@ function selectTarget(
   difficulty: AIDifficulty,
   state: TCGBattleState,
 ): number {
+  if (targets.length === 0) return 0;
   if (difficulty === 'expert') {
     // HPが最も低いターゲットを狙う
     let minHP = Infinity;
@@ -83,7 +84,7 @@ function selectTarget(
 
 function selectForm(
   correctForm: string,
-  verb: { conjugation: { [key: string]: string } },
+  verb: TCGVerbCardDef,
   difficulty: AIDifficulty,
 ): string {
   // AIの正解率を難易度で制御

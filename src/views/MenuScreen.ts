@@ -4,23 +4,31 @@
 
 import { el, onClick, setScreen } from '../utils/render.ts';
 import { playTap } from '../utils/audio.ts';
-import { getOrCreateSave } from '../utils/storage.ts';
+import { getOrCreateSave, getActiveProfile } from '../utils/storage.ts';
 import { renderWorldScreen } from './WorldScreen.ts';
 import { renderGachaScreen } from './GachaScreen.ts';
 import { renderZukanScreen } from './ZukanScreen.ts';
 import { renderCardUpgradeScreen } from './CardUpgradeScreen.ts';
 import { renderDeckEditScreen } from './DeckEditScreen.ts';
 import { renderHowToPlayScreen } from './HowToPlayScreen.ts';
+import { renderProfileSelectScreen } from './ProfileSelectScreen.ts';
 
 export function renderMenuScreen(): void {
   setScreen('menu', () => {
     const screen = el('div', { class: 'menu-screen' });
     const save = getOrCreateSave();
+    const profile = getActiveProfile();
 
     // ヘッダー
     const header = el('div', { class: 'menu-header' });
     const title = el('div', { class: 'text-gold font-serif', style: 'font-size: 1.3rem; font-weight: 900' }, '文法無双');
     header.appendChild(title);
+
+    if (profile) {
+      const profileLabel = el('div', { style: 'font-size: 0.8rem; color: var(--text-secondary); cursor: pointer' }, `👤 ${profile.name}`);
+      onClick(profileLabel, () => { playTap(); renderProfileSelectScreen(); });
+      header.appendChild(profileLabel);
+    }
 
     // プレイヤー情報
     const info = el('div', { class: 'menu-player-info' });

@@ -4,10 +4,15 @@
 
 import { el, onClick, setTCGScreen } from './tcg-render.ts';
 import { playTap } from '../../utils/audio.ts';
-import type { TCGBattleResult } from '../models/tcg-types.ts';
+import type { TCGBattleResult, ConnectionQuizResult } from '../models/tcg-types.ts';
+import { getTCGJodoushiById } from '../data/tcg-cards.ts';
+import { getVerbById } from '../data/verbs.ts';
 import { renderTCGTitleScreen } from './TCGTitleScreen.ts';
 
-export function renderTCGResultScreen(result: TCGBattleResult): void {
+export function renderTCGResultScreen(
+  result: TCGBattleResult,
+  connectionHistory: ConnectionQuizResult[] = [],
+): void {
   setTCGScreen('tcg_result', () => {
     const container = el('div', { class: 'tcg-result' });
 
@@ -45,6 +50,32 @@ export function renderTCGResultScreen(result: TCGBattleResult): void {
       `接続正答率: ${result.connectionAccuracy}%`,
     );
     container.appendChild(accuracyEl);
+
+    // 誤接続レビュー
+    const wrongConnections = connectionHistory.filter(c => !c.isCorrect);
+    if (wrongConnections.length > 0) {
+      const reviewSection = el('div', { class: 'tcg-review' });
+      reviewSection.appendChild(el('div', { class: 'tcg-review-title' }, '復習: 誤接続'));
+
+      for (const conn of wrongConnections) {
+        const jodoushi = getTCGJodoushiById(conn.jodoushiId);
+        const verb = getVerbById(conn.verbId);
+        const jName = jodoushi?.name ?? conn.jodoushiId;
+        const vName = verb?.name ?? conn.verbId;
+
+        const item = el('div', { class: 'tcg-review-item' });
+        item.appendChild(el('div', { class: 'tcg-review-question' },
+          `${jName} → ${vName}`,
+        ));
+        const answerLine = el('div', { class: 'tcg-review-answer' });
+        answerLine.appendChild(el('span', {}, `あなた: ${conn.selectedForm}`));
+        answerLine.appendChild(el('span', { class: 'tcg-review-correct' }, ` / 正解: ${conn.correctForm}`));
+        item.appendChild(answerLine);
+        reviewSection.appendChild(item);
+      }
+
+      container.appendChild(reviewSection);
+    }
 
     // 戻るボタン
     const backBtn = el('button', { class: 'btn btn-primary' }, 'タイトルに戻る');
