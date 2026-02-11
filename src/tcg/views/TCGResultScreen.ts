@@ -17,12 +17,12 @@ export function renderTCGResultScreen(
     const container = el('div', { class: 'tcg-result' });
 
     // 勝敗表示
-    const title = el('h1', {}, result.victory ? '勝利' : '敗北');
+    const titleText = result.isDraw ? '引き分け' : result.victory ? '勝利' : '敗北';
+    const title = el('h1', {}, titleText);
     container.appendChild(title);
 
-    const subtitle = el('p', {},
-      result.victory ? '見事な言霊の使い手だ!' : '次こそは言霊を極めよ...',
-    );
+    const subtitleText = result.isDraw ? '互角の戦いだ!' : result.victory ? '見事な言霊の使い手だ!' : '次こそは言霊を極めよ...';
+    const subtitle = el('p', {}, subtitleText);
     container.appendChild(subtitle);
 
     // 統計

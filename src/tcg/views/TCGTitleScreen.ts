@@ -6,6 +6,7 @@ import { el, onClick, setTCGScreen } from './tcg-render.ts';
 import { allOpponents } from '../data/opponents.ts';
 import { renderTCGDeckScreen } from './TCGDeckScreen.ts';
 import { renderTCGBattleScreen } from './TCGBattleScreen.ts';
+import { renderTCGPracticeScreen } from './TCGPracticeScreen.ts';
 import { initAudio, playTap } from '../../utils/audio.ts';
 import { loadTCGSave } from './tcg-storage.ts';
 
@@ -28,9 +29,11 @@ export function renderTCGTitleScreen(): void {
 
     // 戦績表示
     const save = loadTCGSave();
-    if (save.wins > 0 || save.losses > 0) {
+    if (save.wins > 0 || save.losses > 0 || (save.draws ?? 0) > 0) {
+      const draws = save.draws ?? 0;
+      const drawText = draws > 0 ? ` ${draws}分` : '';
       const statsEl = el('p', { class: 'subtitle' },
-        `戦績: ${save.wins}勝 ${save.losses}敗 | 接続正答率: ${save.connectionStats.total > 0 ? Math.round((save.connectionStats.correct / save.connectionStats.total) * 100) : 0}%`
+        `戦績: ${save.wins}勝 ${save.losses}敗${drawText} | 接続正答率: ${save.connectionStats.total > 0 ? Math.round((save.connectionStats.correct / save.connectionStats.total) * 100) : 0}%`
       );
       container.appendChild(statsEl);
     }
@@ -67,13 +70,24 @@ export function renderTCGTitleScreen(): void {
     }
     container.appendChild(list);
 
-    // デッキ編集ボタン
+    // ボタン群
+    const btnRow = el('div', { style: 'display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center;' });
+
+    const practiceBtn = el('button', { class: 'btn btn-secondary' }, '接続練習');
+    onClick(practiceBtn, () => {
+      playTap();
+      renderTCGPracticeScreen();
+    });
+
     const deckBtn = el('button', { class: 'btn btn-secondary' }, 'デッキ編集');
     onClick(deckBtn, () => {
       playTap();
       renderTCGDeckScreen();
     });
-    container.appendChild(deckBtn);
+
+    btnRow.appendChild(practiceBtn);
+    btnRow.appendChild(deckBtn);
+    container.appendChild(btnRow);
 
     return container;
   });

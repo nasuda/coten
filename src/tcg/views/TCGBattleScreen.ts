@@ -277,6 +277,7 @@ function showConnectionQuiz(
     `「${jodoushi.name}」(${jodoushi.connection})を装備するには？`));
 
   const choices = getConjugationChoices(verb);
+  const conn = checkConnection(jodoushi, verb);
   const formsGrid = el('div', { class: 'tcg-quiz-forms' });
 
   for (const choice of choices) {
@@ -303,15 +304,22 @@ function showConnectionQuiz(
             (otherBtn as HTMLElement).classList.add('correct');
           }
         }
+        // 文法理由フィードバック
+        if (conn.requiredForm && conn.requiredFormName) {
+          const reason = el('div', { class: 'tcg-quiz-reason' },
+            `「${jodoushi.name}」は${conn.requiredFormName}に接続 → 正解は「${conn.requiredForm}」(${conn.requiredFormName})`);
+          box.appendChild(reason);
+        }
       }
 
-      // 少し待ってからUIを更新
+      // 少し待ってからUIを更新（誤答時は読む時間を確保）
+      const delay = lastResult?.isCorrect ? 800 : 1200;
       setTimeout(() => {
         overlay.remove();
         selectedHandIndex = null;
         actionMode = 'idle';
         renderBattleUI(container as HTMLElement, opponent, false);
-      }, 800);
+      }, delay);
     });
     formsGrid.appendChild(btn);
   }
@@ -355,6 +363,8 @@ function endPlayerTurn(container: HTMLElement, opponent: TCGOpponent): void {
 
     if (battleState.phase === 'victory') {
       playVictory();
+    } else if (battleState.phase === 'draw_game') {
+      playTap();
     } else {
       playDefeat();
     }

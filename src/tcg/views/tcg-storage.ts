@@ -10,6 +10,7 @@ function createDefaultTCGSave(): TCGSaveData {
   return {
     wins: 0,
     losses: 0,
+    draws: 0,
     connectionStats: { correct: 0, total: 0 },
     unlockedOpponents: ['opp_1', 'opp_2'],
     selectedDeck: createDefaultDeck(),
@@ -38,13 +39,22 @@ export function saveTCGSave(data: TCGSaveData): void {
 
 export function applyBattleResult(result: TCGBattleResult): void {
   const save = loadTCGSave();
-  if (result.victory) {
+  if (result.isDraw) {
+    save.draws = (save.draws ?? 0) + 1;
+  } else if (result.victory) {
     save.wins++;
   } else {
     save.losses++;
   }
   save.connectionStats.correct += result.connectionCorrect;
   save.connectionStats.total += result.connectionTotal;
+  saveTCGSave(save);
+}
+
+export function applyPracticeResult(correct: number, total: number): void {
+  const save = loadTCGSave();
+  save.connectionStats.correct += correct;
+  save.connectionStats.total += total;
   saveTCGSave(save);
 }
 

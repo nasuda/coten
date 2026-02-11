@@ -5,7 +5,7 @@
 import { el, onClick, setTCGScreen, clearElement } from './tcg-render.ts';
 import { playTap, playEquip } from '../../utils/audio.ts';
 import { allVerbs } from '../data/verbs.ts';
-import { allTCGJodoushiCards } from '../data/tcg-cards.ts';
+import { allTCGJodoushiCards, getTCGJodoushiById } from '../data/tcg-cards.ts';
 import { validateDeck } from '../models/TCGDeckManager.ts';
 import type { TCGDeckConfig } from '../models/tcg-types.ts';
 import { getSelectedDeck, saveSelectedDeck } from './tcg-storage.ts';
@@ -93,6 +93,42 @@ function renderDeckUI(container: HTMLElement): void {
   }
   jodoushiSection.appendChild(jodoushiGrid);
   container.appendChild(jodoushiSection);
+
+  // 接続バランス表示
+  if (currentDeck.jodoushi.length > 0) {
+    const categoryLabels: Record<string, string> = {
+      mizenkei: '未然形',
+      renyoukei: '連用形',
+      shuushikei: '終止形',
+      rentaikei: '連体形',
+      taigen: '体言',
+      special: '特殊',
+    };
+
+    const categoryCount: Record<string, number> = {};
+    for (const jId of currentDeck.jodoushi) {
+      const card = getTCGJodoushiById(jId);
+      if (card) {
+        const cat = card.connectionCategory;
+        categoryCount[cat] = (categoryCount[cat] ?? 0) + 1;
+      }
+    }
+
+    const parts = Object.entries(categoryCount)
+      .map(([cat, count]) => `${categoryLabels[cat] ?? cat}×${count}`)
+      .join(' / ');
+
+    const balanceEl = el('div', { class: 'tcg-log' });
+    balanceEl.appendChild(el('div', {}, `デッキ構成: ${parts}`));
+
+    const uniqueCategories = Object.keys(categoryCount);
+    if (uniqueCategories.length <= 1 && currentDeck.jodoushi.length >= 3) {
+      balanceEl.appendChild(el('div', { style: 'color: #fbbf24; margin-top: 0.3rem;' },
+        '⚠ 接続が偏っています。複数の接続を入れると学習効果UP!'));
+    }
+
+    container.appendChild(balanceEl);
+  }
 
   // バリデーションメッセージ
   const validation = validateDeck(currentDeck);

@@ -343,6 +343,7 @@ export function createBattleResult(state: TCGBattleState, opponentId: string): T
 
   return {
     victory: state.winner === 'player',
+    isDraw: state.phase === 'draw_game',
     opponentId,
     rounds: state.currentRound,
     connectionCorrect: playerCorrect,

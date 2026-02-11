@@ -146,6 +146,7 @@ export interface TCGOpponent {
 // --- TCGバトル結果 ---
 export interface TCGBattleResult {
   victory: boolean;
+  isDraw: boolean;
   opponentId: string;
   rounds: number;
   connectionCorrect: number;
@@ -165,6 +166,7 @@ export interface TCGDeckConfig {
 export interface TCGSaveData {
   wins: number;
   losses: number;
+  draws: number;
   connectionStats: {
     correct: number;
     total: number;
@@ -188,7 +190,7 @@ export const TCG_ELEMENT_ADVANTAGE_MULTIPLIER = 1.5;
 export const TCG_ELEMENT_DISADVANTAGE_MULTIPLIER = 0.75;
 
 // --- TCG画面タイプ ---
-export type TCGScreenType = 'tcg_title' | 'tcg_battle' | 'tcg_deck' | 'tcg_result';
+export type TCGScreenType = 'tcg_title' | 'tcg_battle' | 'tcg_deck' | 'tcg_result' | 'tcg_practice';
 
 // --- TCGセーブキー ---
 export const TCG_SAVE_KEY = 'kotodama_wars_save';
