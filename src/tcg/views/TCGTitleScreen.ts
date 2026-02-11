@@ -7,6 +7,7 @@ import { allOpponents } from '../data/opponents.ts';
 import { renderTCGDeckScreen } from './TCGDeckScreen.ts';
 import { renderTCGBattleScreen } from './TCGBattleScreen.ts';
 import { renderTCGPracticeScreen } from './TCGPracticeScreen.ts';
+import { renderTCGHowToPlayScreen } from './TCGHowToPlayScreen.ts';
 import { initAudio, playTap } from '../../utils/audio.ts';
 import { loadTCGSave } from './tcg-storage.ts';
 
@@ -85,8 +86,15 @@ export function renderTCGTitleScreen(): void {
       renderTCGDeckScreen();
     });
 
+    const howtoBtn = el('button', { class: 'btn btn-secondary' }, '遊び方');
+    onClick(howtoBtn, () => {
+      playTap();
+      renderTCGHowToPlayScreen();
+    });
+
     btnRow.appendChild(practiceBtn);
     btnRow.appendChild(deckBtn);
+    btnRow.appendChild(howtoBtn);
     container.appendChild(btnRow);
 
     return container;

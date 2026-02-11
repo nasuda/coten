@@ -620,3 +620,26 @@
   color: var(--text-secondary, #9ca3af);
   margin-top: 0.2rem;
 }
+
+/* --- ドラッグ＆ドロップ --- */
+.tcg-drag-ghost {
+  position: fixed;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0.85;
+  transform: scale(1.1);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  transition: none;
+}
+
+.tcg-slot.drop-highlight {
+  border-color: #22c55e;
+  border-style: solid;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.tcg-hand-card.dragging {
+  opacity: 0.4;
+}

@@ -26,6 +26,7 @@ import { selectAIAction } from '../models/TCGAIPlayer.ts';
 import { checkConnection, getConjugationChoices } from '../models/ConnectionValidator.ts';
 import { getSelectedDeck, applyBattleResult } from './tcg-storage.ts';
 import { renderTCGResultScreen } from './TCGResultScreen.ts';
+import { setupDraggable, setupDropTarget, cleanupDrag, clearDropTargets, isDragging } from './tcg-drag.ts';
 
 let battleState: TCGBattleState;
 let selectedHandIndex: number | null = null;
@@ -54,6 +55,8 @@ export function renderTCGBattleScreen(opponent: TCGOpponent): void {
 }
 
 function renderBattleUI(container: HTMLElement, opponent: TCGOpponent, resetTimer = true): void {
+  cleanupDrag();
+  clearDropTargets();
   clearElement(container);
 
   // ヘッダー
@@ -161,6 +164,20 @@ function renderSlot(slot: TCGFieldSlot, index: number, who: 'player' | 'opponent
         }
       });
     }
+
+    // ドロップターゲット: 空スロットは動詞カードを受付
+    if (who === 'player') {
+      setupDropTarget(slotEl, 'verb', (cardIndex) => {
+        playTap();
+        battleState = placeVerb(battleState, 'player', cardIndex, index);
+        selectedHandIndex = null;
+        actionMode = 'idle';
+        const cont = slotEl.closest('.tcg-battle') as HTMLElement;
+        const opp = getCurrentOpponent();
+        if (cont && opp) renderBattleUI(cont, opp, false);
+      });
+    }
+
     return slotEl;
   }
 
@@ -209,6 +226,20 @@ function renderSlot(slot: TCGFieldSlot, index: number, who: 'player' | 'opponent
     }
   }
 
+  // ドロップターゲット: 装備なしスロットは助動詞カードを受付
+  if (who === 'player' && !slot.equippedJodoushi) {
+    setupDropTarget(slotEl, 'jodoushi', (cardIndex) => {
+      const handCard = battleState.player.hand[cardIndex];
+      if (handCard?.type === 'jodoushi') {
+        const j = handCard.card as TCGJodoushiCard;
+        const conn = checkConnection(j, slot!.card);
+        if (conn.canConnect) {
+          showConnectionQuiz(j, slot!.card, cardIndex, index);
+        }
+      }
+    });
+  }
+
   // 攻撃モード - 相手ターゲット選択
   if (who === 'opponent' && actionMode === 'attacking') {
     slotEl.classList.add('targetable');
@@ -241,11 +272,14 @@ function renderHandCard(card: TCGCard, index: number, container: HTMLElement, op
     cardEl.appendChild(el('div', { class: 'card-type' }, '動詞'));
 
     onClick(cardEl, () => {
+      if (isDragging()) return;
       playTap();
       selectedHandIndex = index;
       actionMode = 'placing';
       renderBattleUI(container, opponent, false);
     });
+
+    setupDraggable(cardEl, index, 'verb');
   } else {
     const j = card.card as TCGJodoushiCard;
     cardEl.appendChild(el('div', { class: 'card-name' }, j.name));
@@ -253,11 +287,14 @@ function renderHandCard(card: TCGCard, index: number, container: HTMLElement, op
     cardEl.appendChild(el('div', { class: 'card-type' }, `P:${j.power}`));
 
     onClick(cardEl, () => {
+      if (isDragging()) return;
       playTap();
       selectedHandIndex = index;
       actionMode = 'equipping';
       renderBattleUI(container, opponent, false);
     });
+
+    setupDraggable(cardEl, index, 'jodoushi');
   }
 
   return cardEl;
