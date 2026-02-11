@@ -95,6 +95,11 @@ function renderBattleUI(container: HTMLElement, opponent: TCGOpponent, resetTime
 
   container.appendChild(field);
 
+  // アクション案内
+  const prompt = el('div', { class: 'tcg-action-prompt' });
+  prompt.textContent = getActionPrompt();
+  container.appendChild(prompt);
+
   // 手札
   const handArea = el('div', { class: 'tcg-hand' });
   battleState.player.hand.forEach((card, idx) => {
@@ -495,4 +500,20 @@ function getVerbTypeLabel(type: string): string {
 
 function getCurrentOpponent(): TCGOpponent | null {
   return currentOpponentRef;
+}
+
+function getActionPrompt(): string {
+  const hasVerbInHand = battleState.player.hand.some(c => c.type === 'verb');
+  const hasEmptySlot = battleState.player.field.some(s => s === null);
+  const hasJodoushiInHand = battleState.player.hand.some(c => c.type === 'jodoushi');
+  const hasUnequippedVerb = battleState.player.field.some(s => s !== null && !s.equippedJodoushi);
+  const equippedSlots = getEquippedSlotIndices(battleState.player);
+
+  if (actionMode === 'placing') return 'スロットをタップして動詞を配置';
+  if (actionMode === 'equipping') return 'スロットをタップして助動詞を装備';
+  if (actionMode === 'attacking') return '攻撃する相手を選べ！';
+  if (hasVerbInHand && hasEmptySlot) return '手札の動詞をスロットに配置しよう';
+  if (hasJodoushiInHand && hasUnequippedVerb) return '助動詞を動詞に装備して接続クイズに挑戦！';
+  if (equippedSlots.length > 0) return '攻撃ボタンで相手に攻撃しよう！';
+  return 'アクションを選択してください';
 }
