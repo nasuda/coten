@@ -53,7 +53,7 @@ export function renderTCGBattleScreen(opponent: TCGOpponent): void {
   });
 }
 
-function renderBattleUI(container: HTMLElement, opponent: TCGOpponent): void {
+function renderBattleUI(container: HTMLElement, opponent: TCGOpponent, resetTimer = true): void {
   clearElement(container);
 
   // ヘッダー
@@ -109,7 +109,7 @@ function renderBattleUI(container: HTMLElement, opponent: TCGOpponent): void {
     playTap();
     actionMode = 'attacking';
     selectedHandIndex = null;
-    renderBattleUI(container, opponent);
+    renderBattleUI(container, opponent, false);
   });
 
   const passBtn = el('button', { class: 'btn-pass' }, 'パス');
@@ -130,8 +130,13 @@ function renderBattleUI(container: HTMLElement, opponent: TCGOpponent): void {
   }
   container.appendChild(logEl);
 
-  // タイマー開始
-  startTimer(timerFill, container, opponent);
+  // タイマー開始（新ラウンド時のみリセット）
+  if (resetTimer) {
+    startTimer(timerFill, container, opponent);
+  } else {
+    // タイマーをリセットせず、表示だけ継続更新する
+    updateTimerTarget(timerFill, container, opponent);
+  }
 }
 
 function renderSlot(slot: TCGFieldSlot, index: number, who: 'player' | 'opponent'): HTMLElement {
@@ -152,7 +157,7 @@ function renderSlot(slot: TCGFieldSlot, index: number, who: 'player' | 'opponent
           // renderBattleUI will be called from the parent
           const container = slotEl.closest('.tcg-battle') as HTMLElement;
           const opp = getCurrentOpponent();
-          if (container && opp) renderBattleUI(container, opp);
+          if (container && opp) renderBattleUI(container, opp, false);
         }
       });
     }
@@ -239,7 +244,7 @@ function renderHandCard(card: TCGCard, index: number, container: HTMLElement, op
       playTap();
       selectedHandIndex = index;
       actionMode = 'placing';
-      renderBattleUI(container, opponent);
+      renderBattleUI(container, opponent, false);
     });
   } else {
     const j = card.card as TCGJodoushiCard;
@@ -251,7 +256,7 @@ function renderHandCard(card: TCGCard, index: number, container: HTMLElement, op
       playTap();
       selectedHandIndex = index;
       actionMode = 'equipping';
-      renderBattleUI(container, opponent);
+      renderBattleUI(container, opponent, false);
     });
   }
 
@@ -305,7 +310,7 @@ function showConnectionQuiz(
         overlay.remove();
         selectedHandIndex = null;
         actionMode = 'idle';
-        renderBattleUI(container as HTMLElement, opponent);
+        renderBattleUI(container as HTMLElement, opponent, false);
       }, 800);
     });
     formsGrid.appendChild(btn);
@@ -318,6 +323,9 @@ function showConnectionQuiz(
 
 function endPlayerTurn(container: HTMLElement, opponent: TCGOpponent): void {
   stopTimer();
+
+  // クイズオーバーレイが残っていたら除去（タイムアウト時対策）
+  document.querySelector('.tcg-quiz-overlay')?.remove();
 
   // AIアクション
   const aiAction = selectAIAction(battleState, opponent.difficulty);
@@ -367,26 +375,53 @@ function endPlayerTurn(container: HTMLElement, opponent: TCGOpponent): void {
   renderBattleUI(container, opponent);
 }
 
+// タイマーが参照するDOM要素（再描画で差し替わるため外部保持）
+let timerTargetFill: HTMLElement | null = null;
+let timerTargetContainer: HTMLElement | null = null;
+let timerTargetOpponent: TCGOpponent | null = null;
+
 function startTimer(timerFill: HTMLElement, container: HTMLElement, opponent: TCGOpponent): void {
   stopTimer();
   timerStart = Date.now();
+  timerTargetFill = timerFill;
+  timerTargetContainer = container;
+  timerTargetOpponent = opponent;
   const limit = battleState.actionTimeLimit * 1000;
 
   timerInterval = setInterval(() => {
     const elapsed = Date.now() - timerStart;
     const remaining = Math.max(0, 1 - elapsed / limit);
-    timerFill.style.width = `${remaining * 100}%`;
-
-    if (remaining < 0.3) {
-      timerFill.classList.add('urgent');
+    if (timerTargetFill) {
+      timerTargetFill.style.width = `${remaining * 100}%`;
+      if (remaining < 0.3) {
+        timerTargetFill.classList.add('urgent');
+      }
     }
 
     if (elapsed >= limit) {
       stopTimer();
       // 時間切れ → 自動パス
-      endPlayerTurn(container, opponent);
+      if (timerTargetContainer && timerTargetOpponent) {
+        endPlayerTurn(timerTargetContainer, timerTargetOpponent);
+      }
     }
   }, 100);
+}
+
+function updateTimerTarget(timerFill: HTMLElement, container: HTMLElement, opponent: TCGOpponent): void {
+  // タイマーのDOM参照だけ更新（リセットしない）
+  timerTargetFill = timerFill;
+  timerTargetContainer = container;
+  timerTargetOpponent = opponent;
+
+  // 現在の残り時間を即座に反映
+  const limit = battleState.actionTimeLimit * 1000;
+  const elapsed = Date.now() - timerStart;
+  const remaining = Math.max(0, 1 - elapsed / limit);
+  timerFill.style.width = `${remaining * 100}%`;
+  if (remaining < 0.3) {
+    timerFill.classList.add('urgent');
+  }
 }
 
 function stopTimer(): void {
