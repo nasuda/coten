@@ -190,7 +190,7 @@ export const TCG_ELEMENT_ADVANTAGE_MULTIPLIER = 1.5;
 export const TCG_ELEMENT_DISADVANTAGE_MULTIPLIER = 0.75;
 
 // --- TCG画面タイプ ---
-export type TCGScreenType = 'tcg_title' | 'tcg_battle' | 'tcg_deck' | 'tcg_result' | 'tcg_practice' | 'tcg_howtoplay';
+export type TCGScreenType = 'tcg_title' | 'tcg_battle' | 'tcg_deck' | 'tcg_result' | 'tcg_practice' | 'tcg_howtoplay' | 'tcg_profile';
 
 // --- TCGセーブキー ---
 export const TCG_SAVE_KEY = 'kotodama_wars_save';

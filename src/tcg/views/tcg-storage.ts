@@ -1,10 +1,31 @@
 // ============================================================
-// TCG セーブデータ管理
+// TCG セーブデータ管理（プロフィール別）
 // ============================================================
 
 import type { TCGSaveData, TCGBattleResult, TCGDeckConfig } from '../models/tcg-types.ts';
 import { TCG_SAVE_KEY } from '../models/tcg-types.ts';
 import { createDefaultDeck } from '../models/TCGDeckManager.ts';
+import { getActiveProfileId } from '../../utils/storage.ts';
+
+function getTCGSaveKey(): string {
+  const profileId = getActiveProfileId();
+  if (profileId) return `${TCG_SAVE_KEY}_${profileId}`;
+  return TCG_SAVE_KEY;
+}
+
+export function migrateLegacyTCGSave(): void {
+  const profileId = getActiveProfileId();
+  if (!profileId) return;
+
+  const profileKey = `${TCG_SAVE_KEY}_${profileId}`;
+  if (localStorage.getItem(profileKey)) return;
+
+  const legacyRaw = localStorage.getItem(TCG_SAVE_KEY);
+  if (!legacyRaw) return;
+
+  localStorage.setItem(profileKey, legacyRaw);
+  localStorage.removeItem(TCG_SAVE_KEY);
+}
 
 function createDefaultTCGSave(): TCGSaveData {
   return {
@@ -19,7 +40,7 @@ function createDefaultTCGSave(): TCGSaveData {
 }
 
 export function loadTCGSave(): TCGSaveData {
-  const raw = localStorage.getItem(TCG_SAVE_KEY);
+  const raw = localStorage.getItem(getTCGSaveKey());
   if (!raw) return createDefaultTCGSave();
   try {
     return JSON.parse(raw) as TCGSaveData;
@@ -31,7 +52,7 @@ export function loadTCGSave(): TCGSaveData {
 export function saveTCGSave(data: TCGSaveData): void {
   data.lastPlayed = new Date().toISOString();
   try {
-    localStorage.setItem(TCG_SAVE_KEY, JSON.stringify(data));
+    localStorage.setItem(getTCGSaveKey(), JSON.stringify(data));
   } catch {
     // save failure is non-critical
   }
