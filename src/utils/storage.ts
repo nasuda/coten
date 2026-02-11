@@ -48,9 +48,15 @@ export function createDefaultSave(): SaveData {
   };
 }
 
-export function saveSaveData(data: SaveData): void {
+export function saveSaveData(data: SaveData): boolean {
   data.lastPlayed = new Date().toISOString();
-  localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    return true;
+  } catch (e) {
+    console.error('セーブデータの保存に失敗しました:', e);
+    return false;
+  }
 }
 
 export function loadSaveData(): SaveData | null {
@@ -58,7 +64,11 @@ export function loadSaveData(): SaveData | null {
   if (!raw) return null;
   try {
     return JSON.parse(raw) as SaveData;
-  } catch {
+  } catch (e) {
+    console.error('セーブデータの読み込みに失敗しました。データが破損している可能性があります:', e);
+    try {
+      localStorage.setItem(SAVE_KEY + '_corrupted_backup', raw);
+    } catch { /* バックアップ保存失敗は無視 */ }
     return null;
   }
 }

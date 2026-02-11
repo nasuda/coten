@@ -42,8 +42,9 @@ function renderBossRushIntro(): void {
       bossListEl.appendChild(bossItem);
     }
 
-    const desc = el('div', { style: 'color: var(--text-secondary); font-size: 0.8rem; text-align: center; padding: 0 16px' },
-      '4体のボスと連続で戦闘！\n全て撃破でクリアボーナス獲得');
+    const desc = el('div', { style: 'color: var(--text-secondary); font-size: 0.8rem; text-align: center; padding: 0 16px' });
+    desc.appendChild(el('div', {}, '4体のボスと連続で戦闘！'));
+    desc.appendChild(el('div', {}, '全て撃破でクリアボーナス獲得'));
 
     const startBtn = el('button', { class: 'btn btn--gold btn--large', style: 'width: 100%' }, '挑戦開始');
     onClick(startBtn, () => {
@@ -66,7 +67,11 @@ function renderBossRushIntro(): void {
 }
 
 function proceedToNextBoss(): void {
-  if (!rushState) return;
+  if (!rushState) {
+    console.error('ボスラッシュ: rushStateがnullです。ワールドマップに戻ります。');
+    renderWorldScreen();
+    return;
+  }
 
   if (isBossRushComplete(rushState)) {
     renderBossRushComplete();
@@ -88,7 +93,11 @@ function renderBossRushTransition(bossIndex: number, onReady: () => void): void 
   setScreen('boss_rush', () => {
     const screen = el('div', { class: 'boss-rush-screen' });
     const bosses = getBossRushBosses();
-    const boss = bosses[bossIndex]!;
+    const boss = bosses[bossIndex];
+    if (!boss) {
+      onReady();
+      return screen;
+    }
 
     const roundLabel = el('div', { class: 'boss-rush-round' }, `ROUND ${bossIndex + 1} / ${bosses.length}`);
     const emoji = el('div', { style: 'font-size: 4rem; margin: 16px 0' }, boss.emoji);
@@ -117,7 +126,7 @@ function renderBossRushTransition(bossIndex: number, onReady: () => void): void 
 // BattleScreenからの帰還ポイント
 export function handleBossRushResult(result: BattleResult, turnResults: TurnResult[]): void {
   if (!rushState) {
-    // 通常リザルトにフォールバック
+    console.error('ボスラッシュ: rushStateがnullです。通常リザルトにフォールバックします。');
     renderResultScreen(result, turnResults);
     return;
   }
@@ -140,7 +149,11 @@ export function handleBossRushResult(result: BattleResult, turnResults: TurnResu
 }
 
 function renderBossRushComplete(): void {
-  const state = rushState!;
+  if (!rushState) {
+    renderWorldScreen();
+    return;
+  }
+  const state = rushState;
   rushState = null;
 
   setScreen('boss_rush', () => {
@@ -189,7 +202,11 @@ function renderBossRushComplete(): void {
 }
 
 function renderBossRushDefeat(): void {
-  const state = rushState!;
+  if (!rushState) {
+    renderWorldScreen();
+    return;
+  }
+  const state = rushState;
   rushState = null;
 
   setScreen('boss_rush', () => {

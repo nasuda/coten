@@ -4,9 +4,16 @@
 
 let audioCtx: AudioContext | null = null;
 
-function getCtx(): AudioContext {
+function getCtx(): AudioContext | null {
   if (!audioCtx) {
-    audioCtx = new AudioContext();
+    try {
+      audioCtx = new AudioContext();
+    } catch {
+      return null;
+    }
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(() => {});
   }
   return audioCtx;
 }
@@ -22,22 +29,27 @@ function playTone(
   volume = 0.3,
   rampDown = true,
 ): void {
-  const ctx = getCtx();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
+  try {
+    const ctx = getCtx();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
 
-  osc.type = type;
-  osc.frequency.setValueAtTime(frequency, ctx.currentTime);
-  gain.gain.setValueAtTime(volume, ctx.currentTime);
+    osc.type = type;
+    osc.frequency.setValueAtTime(frequency, ctx.currentTime);
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
 
-  if (rampDown) {
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+    if (rampDown) {
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+    }
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch {
+    // 音声再生失敗はゲーム進行を妨げない
   }
-
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start(ctx.currentTime);
-  osc.stop(ctx.currentTime + duration);
 }
 
 // UI タップ音
@@ -54,18 +66,23 @@ export function playCorrect(): void {
 
 // 不正解音（下降ブザー）
 export function playWrong(): void {
-  const ctx = getCtx();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = 'sawtooth';
-  osc.frequency.setValueAtTime(300, ctx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.3);
-  gain.gain.setValueAtTime(0.15, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start(ctx.currentTime);
-  osc.stop(ctx.currentTime + 0.35);
+  try {
+    const ctx = getCtx();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(300, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.3);
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.35);
+  } catch {
+    // 音声再生失敗はゲーム進行を妨げない
+  }
 }
 
 // ダメージ音（ヒット）
@@ -82,20 +99,25 @@ export function playCombo(combo: number): void {
 
 // 必殺技発動音
 export function playSpecial(): void {
-  const ctx = getCtx();
   const notes = [392, 523, 659, 784, 1047];
   notes.forEach((freq, i) => {
     setTimeout(() => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, ctx.currentTime);
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.25);
+      try {
+        const ctx = getCtx();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.25);
+      } catch {
+        // 音声再生失敗はゲーム進行を妨げない
+      }
     }, i * 80);
   });
 }

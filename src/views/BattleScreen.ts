@@ -18,7 +18,7 @@ import { showDamageNumber, showSpeedLabel } from './components/DamageNumber.ts';
 import { showCutinOverlay } from './components/CutinOverlay.ts';
 import { renderResultScreen } from './ResultScreen.ts';
 import { isBossRushActive, handleBossRushResult } from './BossRushScreen.ts';
-import type { Enemy } from '../models/types.ts';
+import type { Enemy, SkillCard } from '../models/types.ts';
 
 function clearElement(element: HTMLElement): void {
   while (element.firstChild) element.removeChild(element.firstChild);
@@ -31,7 +31,10 @@ export function renderBattleScreen(stageId: string, enemy: Enemy): void {
     const stats = calculatePlayerStats(save.player.level);
     const stage = getStageById(stageId);
 
-    let state = createBattleState(enemy, save.player.cards.slice(0, 5), stage?.chapterId ?? 1, stats.maxHP, stats.attackBonus);
+    const deckCards = save.player.equippedDeck
+      .map(id => save.player.cards.find(c => c.id === id))
+      .filter((c): c is SkillCard => c !== undefined);
+    let state = createBattleState(enemy, deckCards.length > 0 ? deckCards : save.player.cards.slice(0, 5), stage?.chapterId ?? 1, stats.maxHP, stats.attackBonus);
     let timerInterval: ReturnType<typeof setInterval> | null = null;
     let answerLocked = false;
 
@@ -157,60 +160,65 @@ export function renderBattleScreen(stageId: string, enemy: Enemy): void {
       answerLocked = true;
       if (timerInterval) clearInterval(timerInterval);
 
-      const timeElapsed = (Date.now() - state.timerStartedAt) / 1000;
-      const correct = selectedIndex === state.currentQuestion.correctCardIndex;
+      try {
+        const timeElapsed = (Date.now() - state.timerStartedAt) / 1000;
+        const correct = selectedIndex === state.currentQuestion.correctCardIndex;
 
-      // カード状態を更新
-      const cards = handArea.querySelectorAll('.skill-card');
-      cards.forEach((card, i) => {
-        if (i === state.currentQuestion!.correctCardIndex) {
-          setCardState(card as HTMLElement, 'correct');
-        } else if (i === selectedIndex && !correct) {
-          setCardState(card as HTMLElement, 'wrong');
+        // カード状態を更新
+        const cards = handArea.querySelectorAll('.skill-card');
+        cards.forEach((card, i) => {
+          if (i === state.currentQuestion!.correctCardIndex) {
+            setCardState(card as HTMLElement, 'correct');
+          } else if (i === selectedIndex && !correct) {
+            setCardState(card as HTMLElement, 'wrong');
+          } else {
+            setCardState(card as HTMLElement, 'disabled');
+          }
+        });
+
+        if (correct) {
+          playCorrect();
+          await waitMs(200);
+          playHit();
         } else {
-          setCardState(card as HTMLElement, 'disabled');
+          playWrong();
         }
-      });
 
-      if (correct) {
-        playCorrect();
-        await waitMs(200);
-        playHit();
-      } else {
-        playWrong();
-      }
+        const result = processTurnAnswer(state, correct, timeElapsed, selectedIndex);
+        state = result.state;
 
-      const result = processTurnAnswer(state, correct, timeElapsed, selectedIndex);
-      state = result.state;
+        updateHPBar(enemyHPBar, state.enemyCurrentHP, state.enemy.maxHP);
+        updateHPBar(playerHPBar, state.playerCurrentHP, state.playerMaxHP);
+        updateComboGauge(comboGauge, state.combo, state.comboGauge);
+        updateSpecialBtn();
 
-      updateHPBar(enemyHPBar, state.enemyCurrentHP, state.enemy.maxHP);
-      updateHPBar(playerHPBar, state.playerCurrentHP, state.playerMaxHP);
-      updateComboGauge(comboGauge, state.combo, state.comboGauge);
-      updateSpecialBtn();
+        if (correct) {
+          shakeEnemy(enemySprite);
+          showDamageNumber(screen, result.turnResult.damage, 'player', result.turnResult.speedBonus > 1.2);
+          const { label } = { label: result.turnResult.speedBonus >= 1.3 ? '疾風！' : '' };
+          showSpeedLabel(screen, label);
+          if (state.combo > 1) playCombo(state.combo);
+          logArea.textContent = `${result.turnResult.damage}ダメージ！ Combo x${state.combo}`;
+        } else {
+          showDamageNumber(screen, Math.floor(state.playerMaxHP * 0.125), 'enemy');
+          logArea.textContent = '不正解... 反撃を受けた！';
+          await animateElement(screen, 'shake', 400);
+        }
 
-      if (correct) {
-        shakeEnemy(enemySprite);
-        showDamageNumber(screen, result.turnResult.damage, 'player', result.turnResult.speedBonus > 1.2);
-        const { label } = { label: result.turnResult.speedBonus >= 1.3 ? '疾風！' : '' };
-        showSpeedLabel(screen, label);
-        if (state.combo > 1) playCombo(state.combo);
-        logArea.textContent = `${result.turnResult.damage}ダメージ！ Combo x${state.combo}`;
-      } else {
-        showDamageNumber(screen, Math.floor(state.playerMaxHP * 0.125), 'enemy');
-        logArea.textContent = '不正解... 反撃を受けた！';
-        await animateElement(screen, 'shake', 400);
-      }
+        await waitMs(1200);
 
-      await waitMs(1200);
-
-      const endResult = checkBattleEnd(state);
-      if (endResult) {
-        endBattle(endResult);
-      } else if (state.turn >= state.maxTurns) {
-        endBattle(state.enemyCurrentHP <= 0 ? 'victory' : 'defeat');
-      } else {
+        const endResult = checkBattleEnd(state);
+        if (endResult) {
+          endBattle(endResult);
+        } else if (state.turn >= state.maxTurns) {
+          endBattle(state.enemyCurrentHP <= 0 ? 'victory' : 'defeat');
+        } else {
+          answerLocked = false;
+          nextTurn();
+        }
+      } catch (e) {
+        console.error('バトル: 回答処理中にエラーが発生しました:', e);
         answerLocked = false;
-        nextTurn();
       }
     }
 
@@ -221,7 +229,9 @@ export function renderBattleScreen(stageId: string, enemy: Enemy): void {
       const question = generateQuestion(chapter, state.hand, qType);
 
       if (!question) {
-        logArea.textContent = '問題生成エラー';
+        console.error(`バトル: チャプター ${chapter} で問題生成に失敗。手札数: ${state.hand.length}, タイプ: ${qType}`);
+        logArea.textContent = '問題生成エラー…ワールドマップに戻ります';
+        setTimeout(() => endBattle('defeat'), 2000);
         return;
       }
 

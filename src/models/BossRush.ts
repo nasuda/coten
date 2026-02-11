@@ -15,7 +15,13 @@ export interface BossRushState {
 const RUSH_BOSS_IDS = ['e1_boss', 'e2_boss', 'e3_boss', 'e4_boss'];
 
 export function getBossRushBosses(): Enemy[] {
-  return RUSH_BOSS_IDS.map(id => allEnemies.find(e => e.id === id)!);
+  return RUSH_BOSS_IDS.map(id => {
+    const enemy = allEnemies.find(e => e.id === id);
+    if (!enemy) {
+      throw new Error(`ボスラッシュ: ボスID "${id}" が敵データに見つかりません`);
+    }
+    return enemy;
+  });
 }
 
 export function createBossRushState(): BossRushState {
